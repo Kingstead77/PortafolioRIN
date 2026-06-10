@@ -12,7 +12,7 @@ A lo largo de la historia, los ingenieros han buscado formas cada vez más efici
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía/esquema conceptual del envío de información entre dos dispositivos (transmisor → medio → receptor)}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.1.jpeg}
 \caption{Modelo conceptual de cualquier comunicación: origen, medio y destino}
 \label{fig:modelo-comunicacion}
 \end{figure}
@@ -41,7 +41,7 @@ Las ventajas parecen claras: es rápida, ya que un byte completo llega en un sol
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir esquema/diagrama comparativo: arriba 8 líneas de datos en paralelo (bus ancho), abajo 1 línea de datos en serie (bus estrecho). Indicar que ambos transmiten el mismo byte.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.2.png}
 \caption{Comparación visual: transmisión paralela (8 líneas) vs. transmisión en serie (1 línea)}
 \label{fig:paralelo-vs-serie}
 \end{figure}
@@ -118,7 +118,7 @@ En la codificación NRZ, el nivel de tensión se mantiene constante durante todo
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de una codificación NRZ mostrando la secuencia de bits 0101100 y su correspondiente forma de onda.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.3.png}
 \caption{Ejemplo de codificación NRZ para una secuencia de bits}
 \label{fig:codificacion-nrz}
 \end{figure}
@@ -129,7 +129,7 @@ En la codificación NRZ bipolar, los bits ``1'' y ``0'' se representan mediante 
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de una codificación NRZ bipolar mostrando la secuencia de bits 0101100 con niveles positivos y negativos.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.4.png}
 \caption{Ejemplo de codificación NRZ bipolar}
 \label{fig:codificacion-nrz-bipolar}
 \end{figure}
@@ -140,7 +140,7 @@ En la codificación NRZ invertida (NRZ-I), la señal \textbf{no cambia} para un 
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos comparativo NRZ vs. NRZ-I para la misma secuencia de bits.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.5.png}
 \caption{Ejemplo de codificación NRZ invertida (NRZ-I)}
 \label{fig:codificacion-nrzi}
 \end{figure}
@@ -151,7 +151,7 @@ En RZ, la señal vuelve a cero (o al nivel de referencia) en la \textbf{mitad} d
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de codificación RZ unipolar para una secuencia de bits.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.6.png}
 \caption{Ejemplo de codificación RZ (Return-to-Zero)}
 \label{fig:codificacion-rz}
 \end{figure}
@@ -162,7 +162,7 @@ En la variante RZ bipolar, un ``1'' se representa como un pulso positivo seguido
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de codificación RZ bipolar para una secuencia de bits.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.7.png}
 \caption{Ejemplo de codificación RZ bipolar}
 \label{fig:codificacion-rz-bipolar}
 \end{figure}
@@ -173,7 +173,7 @@ La codificación Manchester resuelve el problema de la recuperación de reloj ge
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de codificación Manchester para la secuencia de bits 0101. Indicar las transiciones en el centro de cada bit.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.8.png}
 \caption{Ejemplo de codificación Manchester}
 \label{fig:codificacion-manchester}
 \end{figure}
@@ -213,7 +213,7 @@ La topología describe cómo se conectan físicamente los nodos de una red:
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama con las 4 topologías básicas: punto a punto, bus, estrella y anillo. Usar iconos simples de dispositivos.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.9.png}
 \caption{Las cuatro topologías básicas en comunicaciones serie}
 \label{fig:topologias}
 \end{figure}
@@ -245,7 +245,7 @@ Una conexión \textbf{balanceada} (o diferencial) es aquella en la que la señal
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama comparativo: a) Conexión no balanceada (1 señal + GND) con ruido añadido. b) Conexión balanceada (2 señales opuestas) mostrando cómo el ruido común se cancela al restar.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.10.png}
 \caption{Cancelación del ruido en una conexión balanceada (diferencial)}
 \label{fig:balanceada}
 \end{figure}
@@ -264,7 +264,7 @@ Un conductor central rodeado por una malla metálica (blindaje) y una cubierta e
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de un cable coaxial con su conector y la estructura interna (conductor central, aislante, malla, cubierta).}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.11.png}
 \caption{Ejemplo de cable coaxial}
 \label{fig:cable-coaxial}
 \end{figure}
@@ -280,7 +280,7 @@ Dos cables aislados retorcidos entre sí, sin blindaje (UTP) o con blindaje (STP
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de un cable de par trenzado (UTP/STP) mostrando los pares retorcidos y el conector RJ-45.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.12.png}
 \caption{Ejemplo de par trenzado (UTP/STP)}
 \label{fig:par-trenzado}
 \end{figure}
@@ -298,7 +298,7 @@ Sus ventajas son excepcionales:
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de un cable de fibra óptica con sus conectores (SC, LC o ST) y el núcleo de vidrio.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.13.png}
 \caption{Ejemplo de fibra óptica}
 \label{fig:fibra-optica}
 \end{figure}
@@ -315,7 +315,7 @@ Cada dispositivo tiene su propio reloj interno. Los relojes no están sincroniza
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos: línea de datos con nivel alto (idle), transición a bajo (start bit), 8 bits de datos, bit de paridad opcional, y bit de parada (stop bit) a nivel alto.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.14.png}
 \caption{Formato típico de una transmisión asíncrona byte a byte (ejemplo UART)}
 \label{fig:trama-asincrona}
 \end{figure}
@@ -372,7 +372,7 @@ La mayoría de los datos se envían en bloques estructurados llamados \textbf{tr
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de bloques de una trama genérica: [START/Delimitador] [Dirección] [Datos (N bytes)] [CRC/BCC] [STOP/Delimitador] con anotaciones de tamaño.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.15.png}
 \caption{Estructura genérica de una trama de datos en comunicaciones serie}
 \label{fig:trama-generica}
 \end{figure}
@@ -450,7 +450,7 @@ Una técnica común es el \textbf{sondeo} (polling): el maestro consulta a cada 
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de un bus maestro--esclavo con un maestro central y tres esclavos conectados.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.16.png}
 \caption{Topología maestro--esclavo en un bus compartido}
 \label{fig:maestro-esclavo}
 \end{figure}
@@ -463,7 +463,7 @@ La mayoría de los sistemas CSMA incorporan también \textbf{detección de colis
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos mostrando dos nodos CSMA que detectan una colisión y retrasan su retransmisión.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.17.png}
 \caption{Ejemplo de CSMA/CD con detección de colisión y retransmisión}
 \label{fig:csma-cd}
 \end{figure}
@@ -476,7 +476,7 @@ Las franjas horarias suelen ser de una palabra o un byte, aunque pueden ser más
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de un ciclo TDMA con cuatro nodos y sus respectivas franjas horarias (slots).}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.18.png}
 \caption{Ejemplo de ciclo TDMA con cuatro nodos}
 \label{fig:tdma}
 \end{figure}
@@ -513,7 +513,7 @@ La interfaz \textbf{RS-232} es un estándar de comunicación serie asíncrona qu
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de conexión DTE $\leftrightarrow$ DCE mediante RS-232, mostrando los roles de cada extremo.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.19.png}
 \caption{Modelo DTE-DCE en una comunicación RS-232}
 \label{fig:dte-dce}
 \end{figure}
@@ -565,7 +565,7 @@ Los pines restantes se usan para \textbf{control de flujo por hardware} (RTS, CT
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de los pines de un conector DB-9 macho y hembra, señalando TXD, RXD y GND.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.20.png}
 \caption{Distribución de pines en un conector DB-9 para RS-232}
 \label{fig:db9-pines}
 \end{figure}
@@ -620,7 +620,7 @@ La señal de datos se transmite por un \textbf{par trenzado diferencial} (D+ y D
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de un conector USB tipo A con la numeración de pines y colores de cable.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.21.png}
 \caption{Conector USB estándar y asignación de pines}
 \label{fig:usb-pines}
 \end{figure}
@@ -706,7 +706,7 @@ Un \textbf{UART (Universal Asynchronous Receiver-Transmitter)} es un circuito de
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de conexión entre dos dispositivos UART: Dispositivo A (TX $\rightarrow$ RX B) y Dispositivo B (TX $\rightarrow$ RX A), con GND común. Indicar ``conexión cruzada''.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.22.png}
 \caption{Conexión cruzada entre dos dispositivos UART: TX de A con RX de B, y viceversa}
 \label{fig:conexion-uart}
 \end{figure}
@@ -725,7 +725,7 @@ La transmisión de un byte mediante UART sigue un formato estricto:
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.9\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos detallado de una trama UART (ejemplo: 8N1). Mostrar: nivel alto idle, start bit a bajo, bits D0 a D7 (LSB primero), stop bit a alto. Anotar duración de cada segmento en tiempo de bit.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.23.png}
 \caption{Formato de trama UART para la configuración 8N1 (8 bits, sin paridad, 1 bit de parada)}
 \label{fig:trama-uart}
 \end{figure}
@@ -747,13 +747,6 @@ Ejemplos comunes:
 
 \textbf{Velocidad de transmisión (baudios)}: indica el número de bits por segundo. Si el tiempo de bit es $T_b$, la velocidad en baudios es $1/T_b$. Por ejemplo, si $T_b = 0.1\,\mu$s, la velocidad es $10\,000\,000$ baudios (10 Mb/s).
 
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de la pantalla de un osciloscopio mostrando la señal de un byte transmitido por UART. Señalar visualmente el start bit, los bits de datos, y el stop bit.}\vspace{1.5cm}}}
-\caption{Captura de osciloscopio de una trama UART real (ejemplo del carácter 'A')}
-\label{fig:osciloscopio-uart}
-\end{figure}
-
 \subsubsection{Control de flujo por hardware}
 
 Cuando dos dispositivos tienen velocidades de procesamiento muy diferentes, el receptor puede no ser capaz de leer los datos tan rápido como el transmisor los envía. Para evitar la pérdida de información, se utiliza el \textbf{control de flujo por hardware} mediante dos señales adicionales:
@@ -764,37 +757,6 @@ Cuando dos dispositivos tienen velocidades de procesamiento muy diferentes, el r
 \end{itemize}
 
 El procedimiento es: Dispositivo A activa RTS → Dispositivo B responde con CTS → Dispositivo A transmite el byte → A desactiva RTS cuando termina → B desactiva CTS si no puede seguir.
-
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de las señales RTS y CTS en una comunicación UART con control de flujo.}\vspace{1.5cm}}}
-\caption{Secuencia de control de flujo por hardware (RTS/CTS) en UART}
-\label{fig:rts-cts}
-\end{figure}
-
-\subsubsection{Panorama de interfaces seriales}
-
-El UART es solo una de muchas interfaces serie disponibles. En la siguiente tabla se resumen las más relevantes para el ámbito de la Informática Industrial y Robótica:
-
-\begin{table}[htbp]
-\centering
-\small
-\caption{Interfaces seriales más comunes en sistemas embebidos e industriales}
-\begin{tabularx}{\textwidth}{@{}lXXXX@{}}
-\toprule
-\textbf{Interfaz} & \textbf{Modo} & \textbf{Balanceada} & \textbf{Máx. velocidad} & \textbf{Uso típico} \\
-\midrule
-UART & Asíncrono, P2P & No (TTL) & $<$1 Mb/s & Debug, sensores, GPS \\
-SPI & Síncrono, maestro/esclavo & No & $<$50 Mb/s & Memoria, pantallas, SD \\
-I2C & Síncrono, multi-esclavo & No & $<$3.4 Mb/s & Sensores, EEPROM \\
-RS-232 & Asíncrono, P2P & No & 115.2 kb/s & Módems, periféricos antiguos \\
-RS-485 & Asíncrono, bus & Sí (diferencial) & 10 Mb/s & Automatización, PLCs \\
-CAN & Asíncrono, bus & Sí (diferencial) & 1 Mb/s & Automoción, maquinaria \\
-USB & Síncrono, maestro/esclavo & Sí (diferencial) & 20 Gb/s (USB4) & Periféricos, carga \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
 
 
 \subsection{Configuración de pines UART en ESP32-S3}
@@ -816,13 +778,6 @@ UART2 (Serial2) & 16 & 15 & --- & --- \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía del ESP32-S3-DevKitC-1 señalando los pines UART1 (GPIO 17, 18, 19, 20).}\vspace{1.5cm}}}
-\caption{Placa ESP32-S3-DevKitC-1 con indicación de los pines UART utilizados}
-\label{fig:esp32-pines}
-\end{figure}
-
 \textbf{Nota importante}: UART0 está conectado internamente al conversor USB-UART de la propia placa, y se usa para programación y depuración (monitor serie del Arduino IDE). Para la comunicación con un PC externo o con otro dispositivo, se utiliza preferentemente UART1.
 
 \subsection{Desarrollo de la práctica}
@@ -841,7 +796,7 @@ Se desarrollaron dos versiones del programa:
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir captura de pantalla del código Python para envío por serial, o del IDE Arduino con el código ESP32.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.24.png}
 \caption{Código de ejemplo para envío de datos por UART (PC o ESP32)}
 \label{fig:codigo-envio}
 \end{figure}
@@ -858,7 +813,7 @@ Se conectó la sonda del osciloscopio al pin TX (GPIO 18 o 17, según el caso) p
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de la pantalla del osciloscopio con la señal decodificada del carácter 'A'. Añadir anotaciones sobre los bits.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.25.png}
 \caption{Señal UART del carácter 'A' capturada en osciloscopio}
 \label{fig:osciloscopio-a}
 \end{figure}
@@ -877,7 +832,7 @@ Para la comunicación entre PC y ESP32 mediante el cable USB-TTL, se realizó el
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía del montaje físico: ESP32 conectada al cable USB-TTL, y este al PC. Mostrar los cables TX, RX y GND conectados.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.26.png}
 \caption{Montaje físico para comunicación bidireccional PC $\leftrightarrow$ ESP32 por UART}
 \label{fig:montaje-pc-esp32}
 \end{figure}
@@ -885,13 +840,6 @@ Para la comunicación entre PC y ESP32 mediante el cable USB-TTL, se realizó el
 \textbf{Problema detectado}: en una primera versión, se incluyó un carácter \texttt{\textbackslash n} (salto de línea) al final del mensaje. Esto generó una transición extra no deseada en la señal, visible en el osciloscopio. Al eliminarlo, la trama se ajustó exactamente al formato 8N1.
 
 \textbf{Problema de buffer de recepción}: inicialmente, el código incluía una espera (delay) antes de leer. Esto causaba que varios bytes se acumularan en el buffer RX del ESP32 y se leyeran de golpe. Eliminando la espera, la lectura se hizo casi inmediata y se recibió correctamente un byte a la vez.
-
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir captura de pantalla del monitor serie del Arduino IDE o terminal Python mostrando el intercambio de datos entre PC y ESP32.}\vspace{1.5cm}}}
-\caption{Resultado de la comunicación bidireccional PC $\leftrightarrow$ ESP32}
-\label{fig:comunicacion-pc-esp32}
-\end{figure}
 
 \subsection{Relación teoría-práctica}
 
@@ -970,13 +918,6 @@ void loop() {
 }
 \end{lstlisting}
 
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía del montaje físico: dos ESP32-S3 conectadas entre sí, mostrando el cruce TX-RX y GND común.}\vspace{1.5cm}}}
-\caption{Montaje físico de dos ESP32-S3 conectadas en comunicación serie directa}
-\label{fig:montaje-esp32-doble}
-\end{figure}
-
 \subsubsection{Segunda parte: verificación con osciloscopio}
 
 Se conectó la sonda del osciloscopio al pin TX para verificar la transmisión continua del carácter \texttt{'S'} (ASCII 83 = 0x53 = \texttt{01010011} en binario).
@@ -992,7 +933,7 @@ La señal observada en el osciloscopio coincidió exactamente con esta secuencia
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de la pantalla del osciloscopio mostrando la señal del carácter 'S' con los bits anotados.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.27.png}
 \caption{Señal del carácter 'S' en osciloscopio (niveles TTL)}
 \label{fig:osciloscopio-s}
 \end{figure}
@@ -1017,7 +958,7 @@ En condiciones ideales, una ESP32-S3 debería producir niveles de $0\,\mathrm{V}
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de la pantalla del osciloscopio mostrando las medidas de tensión (Vhigh, Vlow, Vpp).}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.28.png}
 \caption{Medida de amplitud de la señal TTL en osciloscopio}
 \label{fig:amplitud-ttl}
 \end{figure}
@@ -1037,7 +978,7 @@ Se comprobó que la comunicación funcionaba correctamente con el cable null-mod
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía del montaje con adaptadores TTL-RS-232 y cable null-modem.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap1/1.29.png}
 \caption{Montaje con adaptadores TTL-RS-232 y cable null-modem}
 \label{fig:null-modem}
 \end{figure}
@@ -1077,10 +1018,3 @@ Conexión entre dos DTE & Cruzar TX-RX manualmente & Null-modem (cruce interno) 
     \item La \textbf{Práctica 1} permite observar directamente la señal UART, confirmar el formato de trama, y establecer una comunicación real entre PC y microcontrolador.
     \item La \textbf{Práctica 2} demuestra la diferencia entre niveles TTL y RS-232, el uso de adaptadores, y la comunicación punto a punto entre dos microcontroladores.
 \end{itemize}
-
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir esquema resumen/mapa conceptual de la Unidad 1: comunicación serie, medios, sincronización, UART, práctica.}\vspace{1.5cm}}}
-\caption{Mapa conceptual resumen de la Unidad 1}
-\label{fig:mapa-unidad1}
-\end{figure}
