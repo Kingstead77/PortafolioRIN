@@ -12,7 +12,7 @@ A lo largo de la historia, los ingenieros han buscado formas cada vez más efici
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/figura1_1.jpeg}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía/esquema conceptual del envío de información entre dos dispositivos (transmisor → medio → receptor)}\vspace{1.5cm}}}
 \caption{Modelo conceptual de cualquier comunicación: origen, medio y destino}
 \label{fig:modelo-comunicacion}
 \end{figure}
@@ -41,7 +41,7 @@ Las ventajas parecen claras: es rápida, ya que un byte completo llega en un sol
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/figura1_2.png}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir esquema/diagrama comparativo: arriba 8 líneas de datos en paralelo (bus ancho), abajo 1 línea de datos en serie (bus estrecho). Indicar que ambos transmiten el mismo byte.}\vspace{1.5cm}}}
 \caption{Comparación visual: transmisión paralela (8 líneas) vs. transmisión en serie (1 línea)}
 \label{fig:paralelo-vs-serie}
 \end{figure}
@@ -83,6 +83,30 @@ Aplicaciones típicas & Buses internos de PCB, RAM & USB, Ethernet, UART, SATA \
 \end{table}
 
 
+\subsection{Principales interfaces de comunicación serie}
+
+A continuación se resumen las interfaces serie más relevantes en el ámbito de la electrónica, la informática industrial y las redes de comunicaciones:
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Principales tipos de interfaces seriales}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{3.5cm}@{}}
+\toprule
+\textbf{Interfaz} & \textbf{Descripción} & \textbf{Aplicación típica} \\
+\midrule
+SPI & Comunicación síncrona de alta velocidad. Maestro y múltiples esclavos. & Memoria flash, pantallas, tarjetas SD \\
+I2C & Comunicación bidireccional con dos líneas (datos y reloj). & Sensores, EEPROM, displays \\
+UART & Protocolo asíncrono básico, común en sistemas embebidos. & Debug, GPS, módems, Bluetooth \\
+RS-232 / RS-422 / RS-485 & Estándares industriales. RS-232 en módems; RS-485 en automatización. & PLCs, módems, redes industriales \\
+USB & Interfaz estándar moderna para periféricos de computadora. & Teclados, discos, cámaras \\
+SATA & Conexión de discos duros internos. & SSD, HDD \\
+CAN & Red para automoción y automatización industrial. & Automóviles, maquinaria, buses \\
+1-Wire & Interfaz de bajo costo para pocos componentes. & Sensores de temperatura, iButton \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 
 \section{Tipos de codificación en comunicaciones serie}
 
@@ -94,20 +118,53 @@ En la codificación NRZ, el nivel de tensión se mantiene constante durante todo
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/nrz_unipolar.png}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de una codificación NRZ mostrando la secuencia de bits 0101100 y su correspondiente forma de onda.}\vspace{1.5cm}}}
 \caption{Ejemplo de codificación NRZ para una secuencia de bits}
 \label{fig:codificacion-nrz}
 \end{figure}
 
-\subsection{NRZ bipolar (NRZ-I)}
+\subsection{NRZ bipolar}
 
-Una variante del NRZ es NRZ-I (inverso), en el que la señal \textbf{no cambia} para un ``0'' y \textbf{invierte} su polaridad para un ``1''. De esta forma, una secuencia de unos produce transiciones continuas, mientras que una secuencia de ceros mantiene el nivel. NRZ-I se utiliza en interfaces como USB (junto con bit stuffing) para garantizar suficientes transiciones y permitir la recuperación de reloj.
+En la codificación NRZ bipolar, los bits ``1'' y ``0'' se representan mediante dos niveles de tensión de polaridad opuesta (por ejemplo, $+$V para ``1'' y $-$V para ``0''). A diferencia del NRZ unipolar, esta variante no presenta componente continua y mejora la inmunidad al ruido, ya que el receptor puede detectar la información midiendo la polaridad de la señal.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/nrz_invertida.png}
-\caption{Comparación entre codificación NRZ y NRZ-I}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de una codificación NRZ bipolar mostrando la secuencia de bits 0101100 con niveles positivos y negativos.}\vspace{1.5cm}}}
+\caption{Ejemplo de codificación NRZ bipolar}
+\label{fig:codificacion-nrz-bipolar}
+\end{figure}
+
+\subsection{NRZ invertida (NRZ-I)}
+
+En la codificación NRZ invertida (NRZ-I), la señal \textbf{no cambia} para un ``0'' y \textbf{invierte} su polaridad para un ``1''. De esta forma, una secuencia de unos produce transiciones continuas, mientras que una secuencia de ceros mantiene el nivel. NRZ-I se utiliza en interfaces como USB (junto con bit stuffing) para garantizar suficientes transiciones y permitir la recuperación de reloj.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos comparativo NRZ vs. NRZ-I para la misma secuencia de bits.}\vspace{1.5cm}}}
+\caption{Ejemplo de codificación NRZ invertida (NRZ-I)}
 \label{fig:codificacion-nrzi}
+\end{figure}
+
+\subsection{RZ (Return-to-Zero)}
+
+En RZ, la señal vuelve a cero (o al nivel de referencia) en la \textbf{mitad} del periodo de bit, independientemente del valor transmitido. Por ejemplo, en RZ unipolar, un ``1'' se representa como un pulso positivo seguido de un retorno a cero, mientras que un ``0'' se mantiene en nivel cero. Aunque simplifica la sincronización, consume más ancho de banda que NRZ.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de codificación RZ unipolar para una secuencia de bits.}\vspace{1.5cm}}}
+\caption{Ejemplo de codificación RZ (Return-to-Zero)}
+\label{fig:codificacion-rz}
+\end{figure}
+
+\subsection{RZ bipolar}
+
+En la variante RZ bipolar, un ``1'' se representa como un pulso positivo seguido de retorno a cero, y un ``0'' como un pulso negativo seguido de retorno a cero. Requiere tres niveles de tensión (positivo, cero y negativo), lo que complica los circuitos, pero proporciona una referencia de nivel clara y permite detectar la pérdida de señal.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de codificación RZ bipolar para una secuencia de bits.}\vspace{1.5cm}}}
+\caption{Ejemplo de codificación RZ bipolar}
+\label{fig:codificacion-rz-bipolar}
 \end{figure}
 
 \subsection{Manchester}
@@ -116,31 +173,9 @@ La codificación Manchester resuelve el problema de la recuperación de reloj ge
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/manchester.png}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de codificación Manchester para la secuencia de bits 0101. Indicar las transiciones en el centro de cada bit.}\vspace{1.5cm}}}
 \caption{Ejemplo de codificación Manchester}
 \label{fig:codificacion-manchester}
-\end{figure}
-
-\subsection{RZ (Return-to-Zero)}
-
-En RZ, la señal vuelve a cero (o al nivel de referencia) en la \textbf{mitad} del periodo de bit, independientemente del valor transmitido. Por ejemplo, un ``1'' se representa como un pulso positivo seguido de un retorno a cero, y un ``0'' como un pulso negativo seguido de retorno a cero (en RZ bipolar). Aunque simplifica la sincronización, consume más ancho de banda y requiere tres niveles de tensión, lo que complica los circuitos.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/topologias.png}
-\caption{Ejemplo de codificación RZ unipolar y bipolar}
-\label{fig:codificacion-rz}
-\end{figure}
-
-\subsection{AMI (Alternate Mark Inversion)}
-
-AMI es una codificación de tres niveles en la que los ``0'' se transmiten como nivel cero, mientras que los ``1'' (marcas) alternan entre polaridad positiva y negativa. Esta alternancia elimina la componente continua y permite detectar errores de transmisión: si el receptor observa dos marcas consecutivas del mismo signo, sabe que ha ocurrido un error. AMI se utiliza en sistemas de telecomunicaciones tradicionales (T1/E1).
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/noBalanceada.png}
-\caption{Ejemplo de codificación AMI}
-\label{fig:codificacion-ami}
 \end{figure}
 
 \begin{table}[htbp]
@@ -152,10 +187,11 @@ AMI es una codificación de tres niveles en la que los ``0'' se transmiten como 
 \textbf{Codificación} & \textbf{Transiciones} & \textbf{Componente DC} & \textbf{Uso típico} \\
 \midrule
 NRZ & No garantizadas & Sí & UART, SPI (interno) \\
-NRZ-I & Sólo en unos (con bit stuffing) & Sí & USB \\
+NRZ bipolar & En cada bit (cambio de polaridad) & No & Telecomunicaciones \\
+NRZ-I (invertida) & Sólo en unos (con bit stuffing) & Sí & USB \\
+RZ (unipolar) & Garantizadas (retorno a cero) & Sí & Canales de fibra óptica antiguos \\
+RZ bipolar & Garantizadas (tres niveles) & No & Telecomunicaciones, satélite \\
 Manchester & Garantizadas (1/bit) & No & Ethernet 10BASE-T \\
-RZ & Garantizadas (retorno a cero) & No (bipolar) & Canales de fibra óptica antiguos \\
-AMI & En marcas (alternadas) & No & T1/E1, telecomunicaciones \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -177,7 +213,7 @@ La topología describe cómo se conectan físicamente los nodos de una red:
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/estructuraTrama.png}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama con las 4 topologías básicas: punto a punto, bus, estrella y anillo. Usar iconos simples de dispositivos.}\vspace{1.5cm}}}
 \caption{Las cuatro topologías básicas en comunicaciones serie}
 \label{fig:topologias}
 \end{figure}
@@ -209,7 +245,7 @@ Una conexión \textbf{balanceada} (o diferencial) es aquella en la que la señal
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/master-slave.png}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama comparativo: a) Conexión no balanceada (1 señal + GND) con ruido añadido. b) Conexión balanceada (2 señales opuestas) mostrando cómo el ruido común se cancela al restar.}\vspace{1.5cm}}}
 \caption{Cancelación del ruido en una conexión balanceada (diferencial)}
 \label{fig:balanceada}
 \end{figure}
@@ -226,6 +262,13 @@ Son las trazas de cobre que conectan chips dentro de una misma placa. Son cortas
 
 Un conductor central rodeado por una malla metálica (blindaje) y una cubierta exterior. Es una línea desbalanceada con impedancia característica típica de $50\,\Omega$. Aunque la atenuación es considerable, puede transportar señales de varios Gb/s en distancias cortas. Hoy se usa principalmente en RF y en algunas redes de comunicaciones.
 
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de un cable coaxial con su conector y la estructura interna (conductor central, aislante, malla, cubierta).}\vspace{1.5cm}}}
+\caption{Ejemplo de cable coaxial}
+\label{fig:cable-coaxial}
+\end{figure}
+
 \subsubsection{Par trenzado (UTP/STP)}
 
 Dos cables aislados retorcidos entre sí, sin blindaje (UTP) o con blindaje (STP). Es el medio más utilizado en redes modernas:
@@ -234,6 +277,13 @@ Dos cables aislados retorcidos entre sí, sin blindaje (UTP) o con blindaje (STP
     \item El blindaje (en STP) protege en entornos industriales ruidosos.
     \item Ejemplos: cableado telefónico, Ethernet CAT5/CAT6.
 \end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de un cable de par trenzado (UTP/STP) mostrando los pares retorcidos y el conector RJ-45.}\vspace{1.5cm}}}
+\caption{Ejemplo de par trenzado (UTP/STP)}
+\label{fig:par-trenzado}
+\end{figure}
 
 \subsubsection{Fibra óptica}
 
@@ -248,9 +298,9 @@ Sus ventajas son excepcionales:
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/csma.png}
-\caption{Medios de transmisión físicos más comunes en comunicaciones serie}
-\label{fig:medios}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de un cable de fibra óptica con sus conectores (SC, LC o ST) y el núcleo de vidrio.}\vspace{1.5cm}}}
+\caption{Ejemplo de fibra óptica}
+\label{fig:fibra-optica}
 \end{figure}
 
 
@@ -265,7 +315,7 @@ Cada dispositivo tiene su propio reloj interno. Los relojes no están sincroniza
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/tdma.png}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos: línea de datos con nivel alto (idle), transición a bajo (start bit), 8 bits de datos, bit de paridad opcional, y bit de parada (stop bit) a nivel alto.}\vspace{1.5cm}}}
 \caption{Formato típico de una transmisión asíncrona byte a byte (ejemplo UART)}
 \label{fig:trama-asincrona}
 \end{figure}
@@ -322,7 +372,7 @@ La mayoría de los datos se envían en bloques estructurados llamados \textbf{tr
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/diagramaPines.png}
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de bloques de una trama genérica: [START/Delimitador] [Dirección] [Datos (N bytes)] [CRC/BCC] [STOP/Delimitador] con anotaciones de tamaño.}\vspace{1.5cm}}}
 \caption{Estructura genérica de una trama de datos en comunicaciones serie}
 \label{fig:trama-generica}
 \end{figure}
@@ -400,7 +450,7 @@ Una técnica común es el \textbf{sondeo} (polling): el maestro consulta a cada 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/conectorUSB.png}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de un bus maestro--esclavo con un maestro central y tres esclavos conectados.}\vspace{1.5cm}}}
 \caption{Topología maestro--esclavo en un bus compartido}
 \label{fig:maestro-esclavo}
 \end{figure}
@@ -413,7 +463,7 @@ La mayoría de los sistemas CSMA incorporan también \textbf{detección de colis
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{assets/cap1/dte-dte.png}
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos mostrando dos nodos CSMA que detectan una colisión y retrasan su retransmisión.}\vspace{1.5cm}}}
 \caption{Ejemplo de CSMA/CD con detección de colisión y retransmisión}
 \label{fig:csma-cd}
 \end{figure}
