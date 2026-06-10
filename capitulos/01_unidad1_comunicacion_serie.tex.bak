@@ -1,0 +1,824 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         UNIDAD 1: COMUNICACIÓN SERIE                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Unidad 1: Comunicación Serie}
+
+\section{¿Por qué comunicamos dispositivos?}
+
+En cualquier sistema industrial moderno, los componentes necesitan intercambiar información: un sensor debe enviar una medida a un controlador, un PLC debe ordenar un movimiento a un motor, o un ordenador debe supervisar el estado de toda una planta. Esta necesidad de compartir datos entre dispositivos electrónicos es el origen de las comunicaciones digitales.
+
+A lo largo de la historia, los ingenieros han buscado formas cada vez más eficientes de transmitir información. Desde el telégrafo de Samuel Morse (1844), que enviaba puntos y rayas por un único cable, hasta las redes industriales actuales que mueven gigabytes por segundo, el principio fundamental es el mismo: codificar información, transportarla por un medio físico y decodificarla en el destino.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía/esquema conceptual del envío de información entre dos dispositivos (transmisor → medio → receptor)}\vspace{1.5cm}}}
+\caption{Modelo conceptual de cualquier comunicación: origen, medio y destino}
+\label{fig:modelo-comunicacion}
+\end{figure}
+
+Hoy en día, la decisión más básica que enfrenta un diseñador de sistemas embebidos es: ¿transmito los datos en paralelo o en serie?
+
+
+\section{Transmisión paralela vs. transmisión en serie}
+
+\subsection{Transferencia en paralelo}
+
+En una transmisión paralela, todos los bits de una palabra de datos se envían simultáneamente por múltiples líneas independientes. Por ejemplo, para transmitir un byte completo (8 bits), se necesitan 8 cables de datos, más las líneas de control y tierra.
+
+\begin{definicion}
+La \textbf{transferencia de datos en paralelo} es un método de comunicación en el que todos los bits de una palabra de datos se transmiten simultáneamente a través de múltiples canales físicos independientes.
+\end{definicion}
+
+Las ventajas parecen claras: es rápida, ya que un byte completo llega en un solo ciclo. Sin embargo, esta aparente ventaja desaparece cuando se analizan los problemas físicos:
+
+\begin{itemize}
+    \item \textbf{Coste hardware elevado}: cada bit requiere su propio conductor, conector y circuito de E/S.
+    \item \textbf{Diafonía}: a alta velocidad, las señales eléctricas de un cable se acoplan a los adyacentes por efecto capacitivo e inductivo, generando ruido.
+    \item \textbf{Sesgo de tiempo (skew)}: los cables no tienen exactamente la misma longitud ni impedancia, por lo que los bits llegan ligeramente desfasados. A velocidades altas, este desfase puede causar errores.
+    \item \textbf{Limitación de distancia}: a frecuencias de decenas de Mb/s, los buses paralelos solo funcionan en trayectos de pocos centímetros. A Gb/s, apenas unos milímetros dentro de un chip.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir esquema/diagrama comparativo: arriba 8 líneas de datos en paralelo (bus ancho), abajo 1 línea de datos en serie (bus estrecho). Indicar que ambos transmiten el mismo byte.}\vspace{1.5cm}}}
+\caption{Comparación visual: transmisión paralela (8 líneas) vs. transmisión en serie (1 línea)}
+\label{fig:paralelo-vs-serie}
+\end{figure}
+
+\subsection{Transferencia en serie}
+
+En una transmisión en serie, los bits se envían uno tras otro por una única línea de datos (más tierra). El byte completo tarda más tiempo en llegar, pero el hardware es mucho más sencillo.
+
+\begin{definicion}[formal de transferencia en serie]
+La \textbf{transferencia de datos en serie} es un método de comunicación en el que los bits de una palabra se transmiten secuencialmente, uno tras otro, a través de un único canal físico.
+\end{definicion}
+
+Las ventajas de la transmisión en serie son:
+\begin{itemize}
+    \item \textbf{Menor coste}: un solo cable de datos, conectores más pequeños y menos pines en los circuitos integrados.
+    \item \textbf{Mayor inmunidad al ruido}: con técnicas de transmisión diferencial (ver sección \ref{sec:balanceado}), el ruido se cancela.
+    \item \textbf{Distancias mayores}: algunas interfaces serie alcanzan cientos de metros (RS-485) o kilómetros (fibra óptica).
+    \item \textbf{Velocidades elevadas}: aunque los bits llegan de uno en uno, las frecuencias de reloj pueden ser muy altas (Gb/s en USB, SATA, fibra óptica).
+\end{itemize}
+
+La principal desventaja es temporal: transmitir un byte en serie tarda más que en paralelo. Sin embargo, en la mayoría de aplicaciones industriales y de comunicaciones, esta diferencia es irrelevante frente a los beneficios de simplicidad y fiabilidad.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Comparativa: transmisión paralela vs. en serie}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+\textbf{Característica} & \textbf{Paralelo} & \textbf{Serie} \\
+\midrule
+Número de líneas de datos & N (una por bit) & 1 \\
+Velocidad por transferencia & Alta (1 byte/ciclo) & Más lenta (1 bit/ciclo) \\
+Coste hardware & Elevado (muchos pines, cables) & Bajo (pocos pines, cables) \\
+Diafonía & Problema grave a alta velocidad & Prácticamente nulo \\
+Distancia máxima & Centímetros a metros & Metros a kilómetros \\
+Aplicaciones típicas & Buses internos de PCB, RAM & USB, Ethernet, UART, SATA \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{Conceptos fundamentales de las comunicaciones serie}
+\label{sec:fundamentos}
+
+\subsection{Topologías de conexión}
+
+La topología describe cómo se conectan físicamente los nodos de una red:
+
+\begin{itemize}
+    \item \textbf{Punto a punto (peer-to-peer)}: la conexión más simple, con solo dos nodos. Ejemplo: un PC conectado a una impresora, o un microcontrolador a un sensor.
+    \item \textbf{Bus}: todos los nodos comparten un mismo medio de transmisión. Ejemplo: RS-485, CAN bus.
+    \item \textbf{Estrella}: todos los nodos se conectan a un nodo central. Ejemplo: Ethernet con switch, USB con hub.
+    \item \textbf{Anillo}: cada nodo se conecta a dos vecinos, formando un círculo. Ejemplo: redes industriales antiguas, anillos ópticos.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama con las 4 topologías básicas: punto a punto, bus, estrella y anillo. Usar iconos simples de dispositivos.}\vspace{1.5cm}}}
+\caption{Las cuatro topologías básicas en comunicaciones serie}
+\label{fig:topologias}
+\end{figure}
+
+\subsection{Configuraciones balanceadas vs. no balanceadas}
+\label{sec:balanceado}
+
+Esta distinción es fundamental para entender la inmunidad al ruido de una comunicación.
+
+\subsubsection{Conexión no balanceada (single-ended)}
+
+En una conexión no balanceada, la señal se transmite por un único conductor y se toma como referencia la tierra (GND). El voltaje de la señal se mide respecto a tierra.
+
+\begin{definicion}[formal de conexión no balanceada]
+Una conexión \textbf{no balanceada} (o desbalanceada) es aquella en la que el voltaje de señal se referencia a un punto de tierra común, utilizando un único conductor para transportar la información.
+\end{definicion}
+
+Es sencilla y económica, pero tiene un problema grave: cualquier ruido inducido en el cable o diferencia de potencial entre las tierras de los dos dispositivos se suma directamente a la señal, pudiendo causar errores.
+
+\subsubsection{Conexión balanceada (diferencial)}
+
+En una conexión balanceada, la señal se transmite por dos conductores, ninguno de los cuales está conectado a tierra. Los voltajes en ambos conductores son de polaridad opuesta respecto a tierra. El receptor no mide el voltaje respecto a tierra, sino la \textbf{diferencia} entre ambos conductores.
+
+\begin{definicion}[formal de conexión balanceada]
+Una conexión \textbf{balanceada} (o diferencial) es aquella en la que la señal se transmite mediante dos conductores con voltajes de polaridad opuesta, y el receptor recupera la información calculando la diferencia entre ambos voltajes.
+\end{definicion}
+
+\textbf{¿Por qué cancela el ruido?} Si un ruido externo se acopla a la línea, afecta por igual a los dos conductores. Como el receptor resta los voltajes, la componente de ruido común ($V_{ruido} - V_{ruido} = 0$) desaparece. Esto se conoce como \textbf{rechazo al modo común (CMRR)}.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama comparativo: a) Conexión no balanceada (1 señal + GND) con ruido añadido. b) Conexión balanceada (2 señales opuestas) mostrando cómo el ruido común se cancela al restar.}\vspace{1.5cm}}}
+\caption{Cancelación del ruido en una conexión balanceada (diferencial)}
+\label{fig:balanceada}
+\end{figure}
+
+\subsection{Medios de transmisión físicos}
+
+Los datos en serie pueden viajar por diferentes medios. Los más comunes son:
+
+\subsubsection{Líneas en placa de circuito impreso (PCB)}
+
+Son las trazas de cobre que conectan chips dentro de una misma placa. Son cortas (centímetros) y pueden ser desbalanceadas (traza + tierra) o balanceadas (dos trazas paralelas). Su uso se limita a comunicaciones internas de alta velocidad entre circuitos integrados vecinos.
+
+\subsubsection{Cable coaxial}
+
+Un conductor central rodeado por una malla metálica (blindaje) y una cubierta exterior. Es una línea desbalanceada con impedancia característica típica de $50\,\Omega$. Aunque la atenuación es considerable, puede transportar señales de varios Gb/s en distancias cortas. Hoy se usa principalmente en RF y en algunas redes de comunicaciones.
+
+\subsubsection{Par trenzado (UTP/STP)}
+
+Dos cables aislados retorcidos entre sí, sin blindaje (UTP) o con blindaje (STP). Es el medio más utilizado en redes modernas:
+\begin{itemize}
+    \item El retorcido reduce la diafonía entre pares adyacentes.
+    \item El blindaje (en STP) protege en entornos industriales ruidosos.
+    \item Ejemplos: cableado telefónico, Ethernet CAT5/CAT6.
+\end{itemize}
+
+\subsubsection{Fibra óptica}
+
+Un núcleo de vidrio o plástico rodeado de revestimiento y cubierta. Los datos se convierten en pulsos de luz infrarroja generados por LEDs o láseres. En el receptor, un fotodiodo (PIN o avalancha) convierte la luz de nuevo en señal eléctrica.
+
+Sus ventajas son excepcionales:
+\begin{itemize}
+    \item Velocidades superiores a 100\,Gb/s.
+    \item Inmunidad total al ruido eléctrico y a la diafonía.
+    \item Distancias de kilómetros sin regeneración.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de los diferentes medios de transmisión: a) cable coaxial, b) par trenzado UTP, c) fibra óptica con conectores.}\vspace{1.5cm}}}
+\caption{Medios de transmisión físicos más comunes en comunicaciones serie}
+\label{fig:medios}
+\end{figure}
+
+
+\section{El reloj: cómo se sincronizan emisor y receptor}
+\label{sec:reloj}
+
+En cualquier comunicación digital, el receptor debe saber \textbf{cuándo} leer cada bit. Si muestrea demasiado pronto o demasiado tarde, leerá un valor incorrecto. La sincronización se resuelve mediante una señal de reloj. En comunicaciones serie existen tres estrategias fundamentales.
+
+\subsection{Transmisión asíncrona: relojes independientes}
+
+Cada dispositivo tiene su propio reloj interno. Los relojes no están sincronizados, pero deben coincidir aproximadamente en frecuencia. Para que el receptor sepa cuándo empieza un nuevo dato, el transmisor añade un \textbf{bit de inicio} (start bit) antes de los datos propiamente dichos. Al detectar esta transición, el receptor recalibra su muestreo para el byte siguiente.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos: línea de datos con nivel alto (idle), transición a bajo (start bit), 8 bits de datos, bit de paridad opcional, y bit de parada (stop bit) a nivel alto.}\vspace{1.5cm}}}
+\caption{Formato típico de una transmisión asíncrona byte a byte (ejemplo UART)}
+\label{fig:trama-asincrona}
+\end{figure}
+
+\textbf{Ventaja}: solo se necesita una línea de datos (más tierra). 
+\textbf{Limitación}: las frecuencias de reloj deben ser muy similares, y se desperdicia algo de tiempo en los bits de sincronización de cada byte.
+
+\subsection{Transmisión síncrona: reloj en línea separada}
+
+El transmisor envía una señal de reloj por un cable adicional, junto con la línea de datos. El receptor muestrea los datos exactamente en los flancos de este reloj externo.
+
+\textbf{Ventaja}: sincronización perfecta, sin margen de error por desajuste de relojes.
+\textbf{Desventaja}: requiere una línea adicional (dos líneas de señal + tierra), lo que encarece el cableado.
+
+\subsection{Recuperación de reloj desde los datos (CDR)}
+
+En las comunicaciones más rápidas, no hay línea de reloj separada ni bits de inicio/parada. El receptor extrae el reloj directamente de las transiciones de la propia señal de datos. Para que esto funcione, los datos deben codificarse de forma que haya suficientes transiciones (0→1 y 1→0), evitando secuencias largas del mismo nivel.
+
+\begin{definicion}[formal de CDR]
+La técnica de \textbf{reloj y recuperación de datos (CDR, Clock and Data Recovery)} consiste en reconstruir la señal de reloj a partir de las transiciones de la propia señal de datos recibida, permitiendo la sincronización sin necesidad de una línea de reloj separada.
+\end{definicion}
+
+Este método se usa en interfaces de alta velocidad como USB 3.0, SATA, PCIe y Ethernet de fibra óptica.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Los tres métodos de sincronización en comunicaciones serie}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+\textbf{Método} & \textbf{Característica} & \textbf{Ejemplo} \\
+\midrule
+Asíncrona & Relojes independientes, bits de inicio/parada & UART, RS-232 \\
+Síncrona (reloj separado) & Línea de reloj adicional, perfecta sincronización & SPI, I2C \\
+CDR & Reloj extraído de los datos, codificación especial & USB 3.0, SATA, Ethernet \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{Formatos de trama y protocolos}
+
+Un \textbf{protocolo} es el conjunto de reglas que definen cómo se comunican dos dispositivos: el formato de los datos, el orden de los bits, la detección de errores, el control de flujo, etc.
+
+La mayoría de los datos se envían en bloques estructurados llamados \textbf{tramas} o \textbf{frames}. Aunque cada protocolo tiene su propio formato, la estructura general sigue un patrón común:
+
+\begin{enumerate}
+    \item \textbf{Delimitador de inicio}: una secuencia especial de bits que indica ``aquí empieza una trama''.
+    \item \textbf{Dirección}: identifica el nodo destino (y a veces el origen).
+    \item \textbf{Datos}: el contenido propiamente dicho, normalmente un bloque de bytes.
+    \item \textbf{Código de control de errores}: un valor calculado a partir de los datos (paridad, CRC, BCC) para detectar o corregir errores.
+    \item \textbf{Delimitador de fin}: señala el final de la trama.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de bloques de una trama genérica: [START/Delimitador] [Dirección] [Datos (N bytes)] [CRC/BCC] [STOP/Delimitador] con anotaciones de tamaño.}\vspace{1.5cm}}}
+\caption{Estructura genérica de una trama de datos en comunicaciones serie}
+\label{fig:trama-generica}
+\end{figure}
+
+\subsection{Transmisión asíncrona vs. síncrona de tramas}
+
+\begin{itemize}
+    \item \textbf{Asíncrona}: cada byte se envía de forma independiente con sus propios bits de inicio y parada. No hay una estructura de trama compleja; se transmiten bytes sueltos.
+    \item \textbf{Síncrona}: los datos se agrupan en tramas largas. No hay bits de inicio/parada por cada byte; en su lugar, la trama comienza con un delimitador especial y el receptor usa CDR o una línea de reloj para muestrear continuamente.
+\end{itemize}
+
+
+\section{Detección y corrección de errores}
+
+El ruido electromagnético, las interferencias y las imperfecciones del medio pueden alterar los bits durante la transmisión. Por eso, los protocolos serie incorporan mecanismos para detectar o incluso corregir errores.
+
+\subsection{Bit de paridad}
+
+Es el método más sencillo. Consiste en añadir un bit extra a cada byte transmitido, de forma que el número total de bits a 1 sea par (paridad par) o impar (paridad impar).
+
+\begin{definicion}[formal del bit de paridad]
+El \textbf{bit de paridad} es un bit adicional que se añade a una palabra de datos para que el número total de bits con valor 1 sea par (paridad par) o impar (paridad impar). El receptor recuenta los bits y compara con el bit de paridad recibido; si hay discrepancia, se detecta un error.
+\end{definicion}
+
+\textbf{Limitación}: solo detecta errores cuando cambia un número impar de bits. Si dos bits se invierten simultáneamente, la paridad no lo detecta. Además, no indica qué bit está mal, solo que ha ocurrido un error.
+
+\subsection{Código de verificación de bloques (BCC / BCS)}
+
+En lugar de verificar byte a byte, se puede calcular un código de verificación para un bloque completo de datos. Un método sencillo es el \textbf{BCC (Block Check Character)}: se suman (o se hace XOR) todos los bytes del bloque, y el resultado final se envía como un carácter de verificación al final de la trama. El receptor repite el cálculo y compara.
+
+Este método permite detectar errores en múltiples bits del bloque, pero no identificar la posición exacta del error.
+
+\subsection{Verificación de redundancia cíclica (CRC)}
+
+El CRC es el método más robusto de detección de errores en comunicaciones serie industriales. En lugar de sumar, se trata los bits de datos como un polinomio binario y se divide por un polinomio generador predefinido. El resto de esta división (el CRC) se adjunta a la trama.
+
+\begin{definicion}[formal de CRC]
+La \textbf{verificación de redundancia cíclica (CRC)} es un método de detección de errores basado en la división polinomial binaria. Los datos a transmitir se representan como un polinomio que se divide por un polinomio generador estándar; el resto de la división se transmite junto con los datos y se verifica en el receptor.
+\end{definicion}
+
+Algunos polinomios generadores estándar son:
+\begin{itemize}
+    \item \textbf{CRC-12}: $x^{12} + x^{11} + x^3 + x + 1$
+    \item \textbf{CRC-16}: $x^{16} + x^{15} + x^2 + x + 1$
+    \item \textbf{CRC-IUT-T}: $x^{16} + x^{12} + x^5 + 1$
+    \item \textbf{CRC-32}: $x^{32} + x^{26} + x^{23} + x^{22} + x^{16} + x^{12} + x^{11} + x^{10} + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1$
+\end{itemize}
+
+El CRC detecta eficazmente las \textbf{ráfagas de errores} (varios bits consecutivos alterados), siempre que la longitud de la ráfaga no supere el grado del polinomio.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Comparativa de métodos de detección de errores}
+\begin{tabularx}{\textwidth}{@{}lXXX@{}}
+\toprule
+\textbf{Método} & \textbf{Complejidad} & \textbf{Eficacia} & \textbf{Uso típico} \\
+\midrule
+Bit de paridad & Muy baja & Detecta 1 bit impar & UART, RS-232 \\
+BCC/BCS & Baja & Detecta errores simples & Protocolos antiguos \\
+CRC & Media & Detecta ráfagas de errores & Ethernet, CAN, USB, industrial \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{El protocolo UART: descripción detallada}
+\label{sec:uart}
+
+Llegamos al protocolo protagonista de esta unidad y de la Práctica 1. El \textbf{UART} (Universal Asynchronous Receiver-Transmitter) es el protocolo de comunicación serie asíncrona más utilizado en electrónica digital y sistemas embebidos.
+
+\subsection{¿Qué es un UART?}
+
+\begin{definicion}[formal de UART]
+Un \textbf{UART (Universal Asynchronous Receiver-Transmitter)} es un circuito de hardware que implementa una comunicación serie asíncrona punto a punto, full-duplex, utilizando dos líneas de datos (TX y RX) y un nivel de tensión común de referencia (GND).
+\end{definicion}
+
+\textbf{Características principales}:
+\begin{itemize}
+    \item \textbf{Asíncrono}: no requiere línea de reloj compartida. La sincronización se logra mediante bits de inicio y parada.
+    \item \textbf{Full-duplex}: ambos dispositivos pueden transmitir y recibir simultáneamente.
+    \item \textbf{Punto a punto}: conecta exactamente dos dispositivos.
+    \item \textbf{Pines mínimos}: TX (transmisión), RX (recepción) y GND (tierra común).
+    \item \textbf{Niveles TTL}: típicamente 0V (lógica 0) y 3.3V o 5V (lógica 1). No confundir con RS-232, que usa voltajes mucho más altos ($\pm$12V).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de conexión entre dos dispositivos UART: Dispositivo A (TX $\rightarrow$ RX B) y Dispositivo B (TX $\rightarrow$ RX A), con GND común. Indicar ``conexión cruzada''.}\vspace{1.5cm}}}
+\caption{Conexión cruzada entre dos dispositivos UART: TX de A con RX de B, y viceversa}
+\label{fig:conexion-uart}
+\end{figure}
+
+\subsection{Formato de la trama UART}
+
+La transmisión de un byte mediante UART sigue un formato estricto:
+
+\begin{enumerate}
+    \item \textbf{Estado de reposo (idle)}: la línea se mantiene a nivel alto (1) cuando no hay transmisión.
+    \item \textbf{Bit de inicio (START)}: una transición a nivel bajo (0) durante un tiempo de bit. Indica al receptor que comienza un nuevo byte.
+    \item \textbf{Bits de datos}: 5, 6, 7 u 8 bits (normalmente 8) que representan el carácter. El bit menos significativo (LSB) se envía primero.
+    \item \textbf{Bit de paridad} (opcional): paridad par (E), impar (O), o sin paridad (N).
+    \item \textbf{Bit(es) de parada (STOP)}: nivel alto (1) durante 0.5, 1, 1.5 o 2 tiempos de bit. Marca el final del byte.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos detallado de una trama UART (ejemplo: 8N1). Mostrar: nivel alto idle, start bit a bajo, bits D0 a D7 (LSB primero), stop bit a alto. Anotar duración de cada segmento en tiempo de bit.}\vspace{1.5cm}}}
+\caption{Formato de trama UART para la configuración 8N1 (8 bits, sin paridad, 1 bit de parada)}
+\label{fig:trama-uart}
+\end{figure}
+
+\subsection{Configuración de una comunicación UART}
+
+Una comunicación UART se especifica mediante una cadena de parámetros:
+
+\begin{center}
+\textbf{\texttt{<velocidad> <bits de datos><paridad><bits de parada>}}
+\end{center}
+
+Ejemplos comunes:
+\begin{itemize}
+    \item \textbf{9600 8N1}: 9600 baudios, 8 bits de datos, sin paridad, 1 bit de parada.
+    \item \textbf{115200 8E1}: 115200 baudios, 8 bits de datos, paridad par (Even), 1 bit de parada.
+    \item \textbf{9600 8O1}: 9600 baudios, 8 bits de datos, paridad impar (Odd), 1 bit de parada.
+\end{itemize}
+
+\textbf{Velocidad de transmisión (baudios)}: indica el número de bits por segundo. Si el tiempo de bit es $T_b$, la velocidad en baudios es $1/T_b$. Por ejemplo, si $T_b = 0.1\,\mu$s, la velocidad es $10\,000\,000$ baudios (10 Mb/s).
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de la pantalla de un osciloscopio mostrando la señal de un byte transmitido por UART. Señalar visualmente el start bit, los bits de datos, y el stop bit.}\vspace{1.5cm}}}
+\caption{Captura de osciloscopio de una trama UART real (ejemplo del carácter 'A')}
+\label{fig:osciloscopio-uart}
+\end{figure}
+
+\subsection{Control de flujo por hardware}
+
+Cuando dos dispositivos tienen velocidades de procesamiento muy diferentes, el receptor puede no ser capaz de leer los datos tan rápido como el transmisor los envía. Para evitar la pérdida de información, se utiliza el \textbf{control de flujo por hardware} mediante dos señales adicionales:
+
+\begin{itemize}
+    \item \textbf{RTS (Request To Send)}: el transmisor activa esta señal para indicar que quiere enviar datos.
+    \item \textbf{CTS (Clear To Send)}: el receptor activa esta señal para indicar que está listo para recibirlos.
+\end{itemize}
+
+El procedimiento es: Dispositivo A activa RTS → Dispositivo B responde con CTS → Dispositivo A transmite el byte → A desactiva RTS cuando termina → B desactiva CTS si no puede seguir.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de tiempos de las señales RTS y CTS en una comunicación UART con control de flujo.}\vspace{1.5cm}}}
+\caption{Secuencia de control de flujo por hardware (RTS/CTS) en UART}
+\label{fig:rts-cts}
+\end{figure}
+
+\subsection{Panorama de interfaces seriales}
+
+El UART es solo una de muchas interfaces serie disponibles. En la siguiente tabla se resumen las más relevantes para el ámbito de la Informática Industrial y Robótica:
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Interfaces seriales más comunes en sistemas embebidos e industriales}
+\begin{tabularx}{\textwidth}{@{}lXXXX@{}}
+\toprule
+\textbf{Interfaz} & \textbf{Modo} & \textbf{Balanceada} & \textbf{Máx. velocidad} & \textbf{Uso típico} \\
+\midrule
+UART & Asíncrono, P2P & No (TTL) & $<$1 Mb/s & Debug, sensores, GPS \\
+SPI & Síncrono, maestro/esclavo & No & $<$50 Mb/s & Memoria, pantallas, SD \\
+I2C & Síncrono, multi-esclavo & No & $<$3.4 Mb/s & Sensores, EEPROM \\
+RS-232 & Asíncrono, P2P & No & 115.2 kb/s & Módems, periféricos antiguos \\
+RS-485 & Asíncrono, bus & Sí (diferencial) & 10 Mb/s & Automatización, PLCs \\
+CAN & Asíncrono, bus & Sí (diferencial) & 1 Mb/s & Automoción, maquinaria \\
+USB & Síncrono, maestro/esclavo & Sí (diferencial) & 20 Gb/s (USB4) & Periféricos, carga \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{El estándar RS-232: comunicación serie industrial}
+\label{sec:rs232}
+
+\subsection{¿Qué es RS-232?}
+
+El estándar \textbf{RS-232} (Recommended Standard 232) es una de las interfaces de comunicación serie más antiguas y duraderas de la industria electrónica. Aunque hoy coexisten con USB, Wi-Fi y Ethernet, el RS-232 sigue siendo ampliamente utilizado en entornos industriales, de automatización y de pruebas de equipos.
+
+\begin{definicion}[formal de RS-232]
+La interfaz \textbf{RS-232} es un estándar de comunicación serie asíncrona que define la transmisión de datos binarios entre un equipo \textbf{DTE} (Data Terminal Equipment, equipo terminal de datos) y un equipo \textbf{DCE} (Data Circuit-terminating Equipment, equipo de comunicación de datos). Especifica las características eléctricas, mecánicas y funcionales de la conexión.
+\end{definicion}
+
+\textbf{Ejemplos clásicos de dispositivos}:
+\begin{itemize}
+    \item \textbf{DTE}: ordenadores personales, terminales, PLCs, microcontroladores como el ESP32.
+    \item \textbf{DCE}: módems, convertidores de interfaz, dispositivos de medición.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de conexión DTE $\leftrightarrow$ DCE mediante RS-232, mostrando los roles de cada extremo.}\vspace{1.5cm}}}
+\caption{Modelo DTE-DCE en una comunicación RS-232}
+\label{fig:dte-dce}
+\end{figure}
+
+\subsection{Niveles de tensión: la gran diferencia con UART/TTL}
+
+La diferencia más importante entre UART (a nivel TTL) y RS-232 es el \textbf{nivel de tensión}:
+
+\begin{itemize}
+    \item \textbf{UART/TTL} (0V / 3.3V o 5V): señales de bajo voltaje, idóneas para comunicaciones internas en PCB o cortas distancias.
+    \item \textbf{RS-232} ($\pm$3V a $\pm$15V, típicamente $\pm$12V): señales de mayor amplitud, mucho más inmunes al ruido electromagnético y capaces de recorrer distancias mayores (hasta 15 metros a velocidades moderadas).
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Comparativa de niveles de tensión: TTL vs. RS-232}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Parámetro} & \textbf{UART/TTL} & \textbf{RS-232} \\
+\midrule
+Nivel lógico 0 (espacio) & 0V & +3V a +15V \\
+Nivel lógico 1 (marca) & 3.3V o 5V & $-$3V a $-$15V \\
+Inversión de señal & No & Sí (0 $\rightarrow$ +V, 1 $\rightarrow$ $-$V) \\
+Distancia máxima & $<$1 metro & Hasta 15 metros \\
+Inmunidad al ruido & Baja & Alta \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{¡Atención!} En RS-232, los niveles están \textbf{invertidos} respecto a TTL: un ``0'' lógico se transmite como voltaje positivo, y un ``1'' lógico como voltaje negativo. Esto es crucial al interpretar señales en un osciloscopio.
+
+\subsection{Conectores y pines}
+
+RS-232 utiliza conectores tipo D-sub:
+\begin{itemize}
+    \item \textbf{DB-9}: 9 pines, el más común hoy en día.
+    \item \textbf{DB-25}: 25 pines, versión original del estándar.
+\end{itemize}
+
+De los 9 pines del DB-9, solo \textbf{tres} son imprescindibles para una comunicación básica:
+\begin{enumerate}
+    \item \textbf{TXD (Transmit Data, pin 3)}: salida de datos desde el DTE.
+    \item \textbf{RXD (Receive Data, pin 2)}: entrada de datos al DTE.
+    \item \textbf{GND (Signal Ground, pin 5)}: referencia de tierra común.
+\end{enumerate}
+
+Los pines restantes se usan para \textbf{control de flujo por hardware} (RTS, CTS, DTR, DSR, DCD, RI), aunque en muchas aplicaciones modernas se omiten.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir diagrama de los pines de un conector DB-9 macho y hembra, señalando TXD, RXD y GND.}\vspace{1.5cm}}}
+\caption{Distribución de pines en un conector DB-9 para RS-232}
+\label{fig:db9-pines}
+\end{figure}
+
+\subsection{Velocidad de subida y limitaciones}
+
+El estándar RS-232 especifica una \textbf{velocidad de subida (slew rate)} máxima de $30\,$V/$\mu$s. Esta limitación intencionada evita que las transiciones rápidas generen interferencias electromagnéticas en señales adyacentes. Como consecuencia, la velocidad máxima de datos está limitada a aproximadamente \textbf{115.2 kb/s} (aunque en la práctica moderna se alcanzan 230.4 kb/s con cables cortos).
+
+\subsection{Ventajas del RS-232 frente a otros protocolos}
+
+\begin{itemize}
+    \item \textbf{Mayor resistencia al ruido}: los voltajes de $\pm$12V son mucho más difíciles de alterar por interferencias que los 3.3V de TTL.
+    \item \textbf{Distancias más largas}: hasta 15 metros frente a menos de 1 metro en TTL.
+    \item \textbf{Compatibilidad universal}: existe hardware de conversión (TTL$\rightarrow$RS-232) muy económico y estandarizado.
+    \item \textbf{Simplicidad de cableado}: solo dos hilos de datos + tierra para una comunicación básica.
+\end{itemize}
+
+\textbf{Limitaciones}: solo permite comunicación \textbf{punto a punto} (un DTE y un DCE), no es adecuado para redes multipunto. Para ello existen RS-485 y CAN bus.
+
+
+\section{Práctica 1: Comunicación UART con ESP32-S3}
+\label{sec:practica1}
+
+\subsection{Objetivos}
+
+La Práctica 1 tiene como objetivos:
+\begin{enumerate}
+    \item Aprender a enviar y recibir datos mediante UART en modo asíncrono.
+    \item Configurar el periférico UART de un microcontrolador (ESP32-S3) mediante su API.
+    \item Examinar la señal UART física con un osciloscopio para comprender el formato de trama.
+    \item Implementar una comunicación bidireccional entre un PC y un microcontrolador.
+\end{enumerate}
+
+\subsection{Material utilizado}
+
+\begin{itemize}
+    \item \textbf{Hardware}: PC, placa de desarrollo ESP32-S3-DevKitC-1, cable USB a TTL, osciloscopio.
+    \item \textbf{Software}: Arduino IDE, Python (pyserial), drivers USB-UART.
+\end{itemize}
+
+\subsection{Configuración de pines UART en ESP32-S3}
+
+El ESP32-S3 dispone de tres UARTs por hardware:
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Mapeo de pines UART en ESP32-S3}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{UART} & \textbf{GPIO RX} & \textbf{GPIO TX} & \textbf{GPIO RTS} & \textbf{GPIO CTS} \\
+\midrule
+UART0 (Serial) & 44 & 43 & --- & --- \\
+UART1 (Serial1) & 18 & 17 & 19 & 20 \\
+UART2 (Serial2) & 16 & 15 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía del ESP32-S3-DevKitC-1 señalando los pines UART1 (GPIO 17, 18, 19, 20).}\vspace{1.5cm}}}
+\caption{Placa ESP32-S3-DevKitC-1 con indicación de los pines UART utilizados}
+\label{fig:esp32-pines}
+\end{figure}
+
+\textbf{Nota importante}: UART0 está conectado internamente al conversor USB-UART de la propia placa, y se usa para programación y depuración (monitor serie del Arduino IDE). Para la comunicación con un PC externo o con otro dispositivo, se utiliza preferentemente UART1.
+
+\subsection{Desarrollo de la práctica}
+
+\subsubsection{Primera parte: envío de datos desde PC y desde ESP32}
+
+Se desarrollaron dos versiones del programa:
+\begin{enumerate}
+    \item \textbf{Programa en Python (PC)}: abre el puerto COM asignado al cable USB-TTL con la velocidad configurada (ej. 9600 baudios) y envía un mensaje mediante \texttt{serial.write()}.
+    \item \textbf{Programa en ESP32 (Arduino IDE)}: configura dos puertos serie:
+    \begin{itemize}
+        \item \texttt{Serial} → UART0 (USB interno), para depuración y monitor.
+        \item \texttt{Serial1} → UART1 (GPIO 17 y 18), para la comunicación externa.
+    \end{itemize}
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir captura de pantalla del código Python para envío por serial, o del IDE Arduino con el código ESP32.}\vspace{1.5cm}}}
+\caption{Código de ejemplo para envío de datos por UART (PC o ESP32)}
+\label{fig:codigo-envio}
+\end{figure}
+
+\subsubsection{Segunda parte: visualización con osciloscopio}
+
+Se conectó la sonda del osciloscopio al pin TX (GPIO 18 o 17, según el caso) para observar la señal física. Enviando el carácter \texttt{'A'} (ASCII 0x41 = 01000001 en binario), se observó:
+
+\begin{itemize}
+    \item \textbf{Bit de inicio}: bajada de nivel (0 lógico).
+    \item \textbf{Bits de datos}: \texttt{1} (LSB), \texttt{0}, \texttt{0}, \texttt{0}, \texttt{0}, \texttt{0}, \texttt{1}, \texttt{0} (MSB) — enviados en orden LSB primero, por lo que en la línea se lee \texttt{10000010} (bit0 a bit7).
+    \item \textbf{Bit de parada}: retorno a nivel alto (1 lógico).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de la pantalla del osciloscopio con la señal decodificada del carácter 'A'. Añadir anotaciones sobre los bits.}\vspace{1.5cm}}}
+\caption{Señal UART del carácter 'A' capturada en osciloscopio}
+\label{fig:osciloscopio-a}
+\end{figure}
+
+\textbf{Decodificación manual}: la configuración utilizada fue 9600 8N1. Cada bit ocupa aproximadamente $1/9600 \approx 104\,\mu$s. En la pantalla del osciloscopio se puede medir la duración de cada pulso y confirmar que coincide con la velocidad configurada.
+
+\subsubsection{Ampliación: comunicación bidireccional PC $\leftrightarrow$ ESP32}
+
+Para la comunicación entre PC y ESP32 mediante el cable USB-TTL, se realizó el siguiente montaje:
+
+\begin{itemize}
+    \item Cable USB-TTL (verde = TX del cable) $\rightarrow$ GPIO 17 (RX de ESP32).
+    \item GPIO 18 (TX de ESP32) $\rightarrow$ cable USB-TTL (blanco = RX del cable).
+    \item GND común entre ambos dispositivos (esencial para la referencia de niveles).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía del montaje físico: ESP32 conectada al cable USB-TTL, y este al PC. Mostrar los cables TX, RX y GND conectados.}\vspace{1.5cm}}}
+\caption{Montaje físico para comunicación bidireccional PC $\leftrightarrow$ ESP32 por UART}
+\label{fig:montaje-pc-esp32}
+\end{figure}
+
+\textbf{Problema detectado}: en una primera versión, se incluyó un carácter \texttt{\textbackslash n} (salto de línea) al final del mensaje. Esto generó una transición extra no deseada en la señal, visible en el osciloscopio. Al eliminarlo, la trama se ajustó exactamente al formato 8N1.
+
+\textbf{Problema de buffer de recepción}: inicialmente, el código incluía una espera (delay) antes de leer. Esto causaba que varios bytes se acumularan en el buffer RX del ESP32 y se leyeran de golpe. Eliminando la espera, la lectura se hizo casi inmediata y se recibió correctamente un byte a la vez.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir captura de pantalla del monitor serie del Arduino IDE o terminal Python mostrando el intercambio de datos entre PC y ESP32.}\vspace{1.5cm}}}
+\caption{Resultado de la comunicación bidireccional PC $\leftrightarrow$ ESP32}
+\label{fig:comunicacion-pc-esp32}
+\end{figure}
+
+\subsection{Relación teoría-práctica}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Conexión entre conceptos teóricos y elementos de la Práctica 1}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Concepto teórico} & \textbf{Observación/aplicación en la práctica} \\
+\midrule
+Transmisión asíncrona & UART no usa reloj compartido; cada byte se sincroniza con su propio start bit \\
+Formato de trama (start/stop) & Visualizado en osciloscopio: bajada (start), 8 bits, subida (stop) \\
+Bit de paridad & Configuración 8N1: sin paridad; se podría cambiar a 8E1 o 8O1 \\
+Velocidad (baudios) & 9600 baudios = $\sim$104\,$\mu$s por bit; medible en osciloscopio \\
+Conexión P2P & Solo un PC y un ESP32; no es multidrop \\
+Niveles TTL & ESP32 trabaja a 3.3V; el cable USB-TTL adapta a USB \\
+Control de flujo (CTS/RTS) & GPIO 19 y 20 disponibles en ESP32, aunque no usados en esta práctica básica \\
+Conexión cruzada TX$\leftrightarrow$RX & El TX del cable se conecta al RX del ESP32, y viceversa \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{Práctica 2: Comunicación RS-232 entre ESP32-S3}
+\label{sec:practica2}
+
+\subsection{Objetivos}
+
+La Práctica 2 amplía los conocimientos de la Práctica 1 introduciendo el estándar RS-232:
+\begin{enumerate}
+    \item Configurar la comunicación serie entre dos placas ESP32-S3 utilizando el protocolo RS-232.
+    \item Observar las diferencias entre señales TTL (UART) y señales RS-232 (niveles de tensión e inversión).
+    \item Verificar con osciloscopio la transmisión continua de un carácter y analizar su amplitud.
+    \item Utilizar un cable \textbf{null-modem} para la comunicación directa entre dos DTE.
+\end{enumerate}
+
+\subsection{Material utilizado}
+
+\begin{itemize}
+    \item \textbf{Hardware}: 2 placas ESP32-S3-DevKitC-1, PC, 2 cables USB-TTL, 2 adaptadores TTL a RS-232, 2 adaptadores TTL a RS-485, cable null-modem, osciloscopio.
+    \item \textbf{Software}: Arduino IDE.
+\end{itemize}
+
+\subsection{Desarrollo de la práctica}
+
+\subsubsection{Primera parte: comunicación directa UART entre dos ESP32}
+
+Se estableció una comunicación punto a punto entre dos placas ESP32-S3 mediante el puerto Serial2 (GPIO 16 y 17), conectando TX$\leftrightarrow$RX cruzado y GND común.
+
+El código utilizado permite enviar o recibir simplemente comentando la parte no deseada:
+
+\begin{lstlisting}[caption={Código ESP32 para transmisión/recepción por Serial2},label={lst:esp32-serial2}]
+#define RXD2 17
+#define TXD2 18
+
+void setup() {
+  Serial.begin(600);          // Debug USB
+  Serial2.begin(600, SERIAL_8N1, RXD2, TXD2);
+  Serial.println("ESP32 listo");
+}
+
+void loop() {
+  // Enviar datos
+  Serial2.print("S");
+  Serial.println("S");
+  
+  // Leer si hay datos (comentar si solo se envia)
+  /*if (Serial2.available()) {
+    char data = Serial2.read('\n');
+    Serial.print("Recibido: ");
+    Serial.println(data);
+  }*/
+  
+  delay(100);
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía del montaje físico: dos ESP32-S3 conectadas entre sí, mostrando el cruce TX-RX y GND común.}\vspace{1.5cm}}}
+\caption{Montaje físico de dos ESP32-S3 conectadas en comunicación serie directa}
+\label{fig:montaje-esp32-doble}
+\end{figure}
+
+\subsubsection{Segunda parte: verificación con osciloscopio}
+
+Se conectó la sonda del osciloscopio al pin TX para verificar la transmisión continua del carácter \texttt{'S'} (ASCII 83 = 0x53 = \texttt{01010011} en binario).
+
+\textbf{Análisis de la trama observada}:
+\begin{itemize}
+    \item El carácter \texttt{'S'} tiene valor binario: \texttt{01010011} (MSB $\rightarrow$ LSB).
+    \item En UART, el \textbf{LSB se envía primero}, por lo que el orden de transmisión es: \texttt{11001010}.
+    \item La trama completa es: \textbf{Start bit} (0) + \texttt{11001010} + \textbf{Stop bit} (1).
+\end{itemize}
+
+La señal observada en el osciloscopio coincidió exactamente con esta secuencia teórica.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de la pantalla del osciloscopio mostrando la señal del carácter 'S' con los bits anotados.}\vspace{1.5cm}}}
+\caption{Señal del carácter 'S' en osciloscopio (niveles TTL)}
+\label{fig:osciloscopio-s}
+\end{figure}
+
+\subsubsection{Tercera parte: análisis de amplitud de la señal}
+
+Se midieron los niveles de tensión de la señal TTL:
+
+\begin{itemize}
+    \item \textbf{Nivel alto}: aproximadamente $2.90\,\mathrm{V}$
+    \item \textbf{Nivel bajo}: aproximadamente $0.70\,\mathrm{V}$
+    \item \textbf{Amplitud pico a pico}: $\approx 2.20\,\mathrm{V}$
+\end{itemize}
+
+En condiciones ideales, una ESP32-S3 debería producir niveles de $0\,\mathrm{V}$ (bajo) y $3.3\,\mathrm{V}$ (alto). Las pequeñas desviaciones observadas se explican por:
+\begin{itemize}
+    \item Efecto de carga de la sonda del osciloscopio sobre el circuito.
+    \item Caídas de tensión en el cableado.
+    \item Referencia de masa no completamente estable.
+    \item Ruido eléctrico ambiental, especialmente visible en los flancos.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía de la pantalla del osciloscopio mostrando las medidas de tensión (Vhigh, Vlow, Vpp).}\vspace{1.5cm}}}
+\caption{Medida de amplitud de la señal TTL en osciloscopio}
+\label{fig:amplitud-ttl}
+\end{figure}
+
+\subsubsection{Cuarta parte: uso del cable null-modem}
+
+Un cable \textbf{null-modem} es un cable especial que cruza internamente las líneas TX y RX, permitiendo conectar dos equipos \textbf{DTE} (como dos ESP32) directamente sin necesidad de un DCE intermedio.
+
+El montaje consiste en:
+\begin{itemize}
+    \item Conectar los adaptadores TTL$\rightarrow$RS-232 a cada ESP32.
+    \item Unir ambos extremos mediante el cable null-modem.
+    \item La conexión cruzada TX$\leftrightarrow$RX se realiza internamente en el cable.
+\end{itemize}
+
+Se comprobó que la comunicación funcionaba correctamente con el cable null-modem, y la señal observada en el osciloscopio coincidió con la obtenida anteriormente.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir fotografía del montaje con adaptadores TTL-RS-232 y cable null-modem.}\vspace{1.5cm}}}
+\caption{Montaje con adaptadores TTL-RS-232 y cable null-modem}
+\label{fig:null-modem}
+\end{figure}
+
+\subsection{Relación teoría-práctica: comparación UART vs. RS-232}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Comparación entre Práctica 1 (UART/TTL) y Práctica 2 (RS-232)}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+\textbf{Aspecto} & \textbf{Práctica 1 (UART/TTL)} & \textbf{Práctica 2 (RS-232)} \\
+\midrule
+Nivel lógico 0 & 0V & $+$3V a $+$15V (típ. $+$12V) \\
+Nivel lógico 1 & 3.3V & $-$3V a $-$15V (típ. $-$12V) \\
+Inversión de señal & No & Sí \\
+Distancia & $<$1 metro (USB-TTL) & Hasta 15 metros \\
+Inmunidad al ruido & Baja & Alta \\
+Hardware necesario & Cable USB-TTL & Adaptador TTL$\rightarrow$RS-232 \\
+Conexión entre dos DTE & Cruzar TX-RX manualmente & Null-modem (cruce interno) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{Resumen de la Unidad 1}
+
+\begin{itemize}
+    \item Las \textbf{comunicaciones en serie} han sustituido a las paralelas en la mayoría de aplicaciones por su menor coste, mayor fiabilidad y capacidad para largas distancias.
+    \item La \textbf{conexión diferencial} (balanceada) cancela el ruido común y es el estándar en entornos industriales.
+    \item La \textbf{sincronización} puede ser asíncrona (UART), síncrona con reloj separado (SPI) o mediante recuperación desde los datos (CDR en USB/Ethernet).
+    \item Los \textbf{protocolos} empaquetan los datos en tramas con delimitadores, direcciones y códigos de detección de errores.
+    \item La \textbf{detección de errores} evoluciona desde el simple bit de paridad hasta el robusto CRC, pasando por el BCC.
+    \item El \textbf{UART} es el protocolo asíncrono básico más usado en sistemas embebidos; su formato 8N1 es la configuración estándar.
+    \item El estándar \textbf{RS-232} extiende el UART a niveles de tensión industriales ($\pm$12V), permitiendo distancias mayores y mayor inmunidad al ruido.
+    \item La \textbf{Práctica 1} permite observar directamente la señal UART, confirmar el formato de trama, y establecer una comunicación real entre PC y microcontrolador.
+    \item La \textbf{Práctica 2} demuestra la diferencia entre niveles TTL y RS-232, el uso de adaptadores, y la comunicación punto a punto entre dos microcontroladores.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Añadir esquema resumen/mapa conceptual de la Unidad 1: comunicación serie, medios, sincronización, UART, práctica.}\vspace{1.5cm}}}
+\caption{Mapa conceptual resumen de la Unidad 1}
+\label{fig:mapa-unidad1}
+\end{figure}

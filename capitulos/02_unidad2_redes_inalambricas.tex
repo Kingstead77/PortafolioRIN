@@ -1,0 +1,593 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         CAPÍTULO 2
+%                  Redes Inalámbricas y Comunicaciones IoT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Redes Inalámbricas y Comunicaciones IoT}
+
+En los capítulos anteriores hemos estudiado cómo transmitir datos mediante cables:
+señales eléctricas que viajan por hilos de cobre siguiendo reglas estrictas como
+UART o RS-232. Sin embargo, en muchos entornos industriales y de automatización
+resulta inviable o poco práctico tender cables entre cada dispositivo. Imagina un
+almacén robotizado donde cientos de sensores de movimiento deben comunicarse con
+una central, o una fábrica de alimentos donde los cables dificultan la higiene.
+
+En este capítulo abordamos las \textbf{comunicaciones inalámbricas}, que utilizan
+ondas de radio en lugar de conductores físicos para transmitir información. Nos
+centraremos en las dos tecnologías más utilizadas en sistemas embebidos:
+\textbf{Bluetooth Low Energy} (BLE) y \textbf{Wi-Fi}, y veremos cómo aplicarlas
+en la práctica para construir una red de sensores IoT (Internet de las Cosas).
+
+
+\section{Comunicaciones inalámbricas: ¿por qué eliminar los cables?}
+
+La tendencia en la industria 4.0 es hacia la \textbf{desconexión física}: dispositivos
+que se comunican sin cables, que se autoconfiguran y que pueden desplazarse.
+Algunas ventajas de las comunicaciones inalámbricas son:
+
+\begin{itemize}
+    \item \textbf{Flexibilidad de instalación}: no es necesario diseñar canalizaciones
+    ni prever la longitud exacta de los cables.
+    \item \textbf{Movilidad}: robots, carretillas elevadoras o sensores portátiles pueden
+    cambiar de ubicación sin restringirse por el cableado.
+    \item \textbf{Reducción de costes de mantenimiento}: los cables físicos se degradan
+    con el tiempo, especialmente en entornos con vibraciones, humedad o
+    temperaturas extremas.
+    \item \textbf{Escalabilidad}: es más sencillo añadir nuevos dispositivos a una red
+    inalámbrica existente que tender nuevos cables.
+\end{itemize}
+
+Sin embargo, también existen inconvenientes:
+\begin{itemize}
+    \item \textbf{Interferencias}: otras redes, microondas o motores eléctricos pueden
+    degradar la señal.
+    \item \textbf{Seguridad}: las ondas de radio pueden ser interceptadas si no se
+    cifran adecuadamente.
+    \item \textbf{Consumo energético}: transmitir por radio consume más energía que
+    enviar señales por un hilo.
+    \item \textbf{Alcance limitado}: la potencia de transmisión está regulada y, en
+    interiores, las paredes atenúan la señal.
+\end{itemize}
+
+
+\section{Bluetooth vs. Wi-Fi: dos filosofías, una misma banda}
+
+Tanto Bluetooth como Wi-Fi operan en la banda de radio de \textbf{2.4 GHz} (aunque
+Wi-Fi también puede usar 5 GHz y 6 GHz en versiones modernas). A pesar de
+compartir el mismo espectro, están diseñados para propósitos muy diferentes.
+
+\begin{definicion}{Bluetooth y Wi-Fi}
+\textbf{Bluetooth} es un estándar de comunicación inalámbrica de corto alcance y
+bajo consumo, pensado para crear redes de área personal (PAN) entre dispositivos
+próximos.
+
+\textbf{Wi-Fi} es un estándar de comunicación inalámbrica de mayor alcance y
+velocidad, diseñado para crear redes de área local (LAN) que permiten a
+múltiples dispositivos acceder a internet o compartir recursos de forma simultánea.
+\end{definicion}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Comparación entre Bluetooth y Wi-Fi}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+\textbf{Característica} & \textbf{Bluetooth (BLE)} & \textbf{Wi-Fi} \\
+\midrule
+Alcance típico & 10--100 m (según clase) & 30--100 m (interior) \\
+Velocidad de datos & Hasta 2 Mb/s (BLE 5.0) & Hasta varios Gb/s (Wi-Fi 6) \\
+Consumo de energía & Muy bajo (meses con pila) & Alto (necesita alimentación) \\
+Topología típica & Punto a punto (1 maestro, 7 esclavos) & Estrella (AP + múltiples clientes) \\
+Uso principal & Periféricos, sensores, wearables & Acceso a internet, streaming, redes corporativas \\
+Complejidad de protocolo & Simple (GATT) & Compleja (TCP/IP, HTTP, etc.) \\
+Interferencias en 2.4 GHz & Alta (comparte banda con Wi-Fi) & Alta (comparte banda con Bluetooth) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{¿Cuándo usar cada uno?}
+\begin{itemize}
+    \item Usa \textbf{Bluetooth} cuando necesites conectar un sensor o un periférico
+    a un dispositivo central, con bajo consumo y sin necesidad de acceso a internet.
+    Ejemplos: auriculares inalámbricos, pulsómetros, sensores de temperatura portátiles.
+    \item Usa \textbf{Wi-Fi} cuando el dispositivo necesite enviar datos a un servidor
+    en la nube, recibir comandos remotos o formar parte de una red corporativa.
+    Ejemplos: cámaras de videovigilancia, termostatos inteligentes, paneles de control.
+\end{itemize}
+
+
+\section{Bluetooth Low Energy (BLE)}
+
+\subsection{¿Qué es BLE?}
+
+Bluetooth Low Energy (BLE), también conocido como Bluetooth Smart, es una versión
+del estándar Bluetooth optimizada para un consumo de energía mínimo. No es
+compatible a nivel de protocolo con el Bluetooth clásico (el de los auriculares), pero
+comparte la misma banda de radio.
+
+\begin{definicion}{Bluetooth Low Energy (BLE)}
+BLE es un protocolo de comunicación inalámbrica de corto alcance que permite la
+transmisión de pequeños paquetes de datos con un consumo de energía extremadamente
+bajo. Es ideal para dispositivos alimentados por baterías que deben operar durante
+meses o años sin recargarse.
+\end{definicion}
+
+En BLE, los dispositivos desempeñan dos roles principales:
+\begin{itemize}
+    \item \textbf{Periférico (Peripheral)}: dispositivo que ofrece datos. Suele ser el sensor
+    o el actuador.
+    \item \textbf{Central (Central)}: dispositivo que solicita y recibe datos. Suele ser un
+    teléfono, un PC o un gateway IoT.
+\end{itemize}
+
+\subsection{Arquitectura GATT: servicios y características}
+
+BLE organiza la información mediante una estructura jerárquica conocida como
+\textbf{GATT} (Generic Attribute Profile):
+
+\begin{enumerate}
+    \item \textbf{Perfil (Profile)}: conjunto de servicios predefinidos para un uso específico
+    (por ejemplo, un perfil de pulsómetro).
+    \item \textbf{Servicio (Service)}: agrupación lógica de características. Por ejemplo, un
+    ``servicio de temperatura''.
+    \item \textbf{Característica (Characteristic)}: el dato concreto. Puede ser una
+    temperatura, una cadena de texto o un valor de configuración.
+    \item \textbf{Descriptor (Descriptor)}: metadatos adicionales sobre una característica,
+    como su formato o unidades.
+\end{enumerate}
+
+Cada servicio y característica se identifica mediante un \textbf{UUID} (Universally Unique
+Identifier), un código de 128 bits que garantiza que no haya colisiones entre
+aplicaciones diferentes.
+
+\begin{definicion}{UUID en BLE}
+Un \textbf{UUID} (Universally Unique Identifier) es un identificador numérico de 128 bits
+que se utiliza para distinguir de forma única servicios, características y descriptores
+dentro de una aplicación BLE. Los UUIDs pueden ser estandarizados (16 o 32 bits) o
+customizados por el desarrollador (128 bits).
+\end{definicion}
+
+\subsection{Advertising y escaneo}
+
+Un periférico BLE no puede ser conectado directamente. Primero debe anunciar su
+presencia mediante un proceso llamado \textbf{advertising} (difusión): envía paquetes
+periódicos de anuncio que contienen su nombre, el UUID de sus servicios y otros
+datos.
+
+Una central que desea conectarse realiza un \textbf{escaneo} (scanning): escucha los
+paquetes de anuncio hasta encontrar un dispositivo con el UUID que busca. Una vez
+encontrado, se establece la conexión.
+
+\subsection{Notificaciones y lecturas}
+
+Las características BLE pueden tener diferentes propiedades:
+\begin{itemize}
+    \item \textbf{READ}: la central puede leer el valor explícitamente.
+    \item \textbf{WRITE}: la central puede escribir un valor.
+    \item \textbf{NOTIFY}: el periférico envía el valor automáticamente cada vez que cambia,
+    sin que la central tenga que pedirlo.
+\end{itemize}
+
+Las notificaciones son especialmente útiles en IoT: el sensor envía una nueva lectura
+de temperatura cada vez que está disponible, sin que el receptor tenga que estar
+constantemente preguntando.
+
+
+\section{Wi-Fi en sistemas embebidos}
+
+\subsection{Modos de operación}
+
+Un dispositivo Wi-Fi puede funcionar en dos modos principales:
+
+\begin{itemize}
+    \item \textbf{STA (Station)}: el dispositivo se conecta a un punto de acceso (AP)
+    existente, como un router. Es el modo más común para sensores IoT.
+    \item \textbf{AP (Access Point)}: el dispositivo crea su propia red Wi-Fi a la que
+    otros dispositivos pueden conectarse. Útil para configuración inicial.
+\end{itemize}
+
+\subsection{Protocolo HTTP para IoT}
+
+En la práctica, cuando un dispositivo embebido con Wi-Fi necesita comunicarse, lo
+hace a través del protocolo \textbf{HTTP} (HyperText Transfer Protocol), el mismo que
+utiliza un navegador web para cargar páginas.
+
+\begin{definicion}{HTTP en IoT}
+HTTP es el protocolo de comunicación que permite a un cliente (por ejemplo, una
+ESP32 o un navegador) solicitar recursos a un servidor. En el contexto IoT, un sensor
+puede actuar como \textbf{servidor HTTP}, respondiendo a peticiones con datos en formato
+texto, JSON o XML.
+\end{definicion}
+
+El flujo típico es:
+\begin{enumerate}
+    \item El dispositivo sensor se conecta a la red Wi-Fi (modo STA).
+    \item Se le asigna una dirección IP por DHCP.
+    \item Inicia un servidor HTTP en un puerto (normalmente el 80).
+    \item Define rutas, como \texttt{/temperatura}, que devuelven el valor del sensor.
+    \item Un cliente (otra ESP32, un PC o un smartphone) realiza una petición
+    \texttt{GET} a esa IP y ruta, y recibe el dato.
+\end{enumerate}
+
+\subsection{Redes corporativas y seguridad}
+
+En entornos universitarios o industriales, las redes Wi-Fi suelen estar protegidas
+mediante autenticación (WPA2-PSK, WPA2-Enterprise) o listas de control de acceso
+(MAC filtering). Esto puede complicar la conexión de dispositivos IoT, ya que no todos
+los sistemas embebidos soportan los métodos de autenticación más avanzados.
+
+En la práctica, una solución común cuando la red corporativa es problemática es
+utilizar un \textbf{hotspot móvil} (punto de acceso creado por un teléfono), que permite
+controlar directamente qué dispositivos se conectan.
+
+
+\section{Sensor de temperatura y humedad DHT11}
+
+El \textbf{DHT11} es un sensor digital de bajo coste que mide temperatura y humedad
+relativa del aire. Es muy popular en proyectos educativos y de prototipado porque
+su conexión es simple (solo necesita un pin de datos y alimentación) y proporciona
+valores directamente en formato digital, sin necesidad de conversión analógica.
+
+\begin{definicion}{DHT11}
+El DHT11 es un sensor digital compuesto que incluye un elemento resistivo para medir
+humedad y un termistor para medir temperatura. Su resolución es de 1 grado Celsius y
+1 \% de humedad relativa, con un rango de 0 a 50 grados Celsius. El tiempo mínimo
+entre lecturas es de aproximadamente 1 segundo.
+\end{definicion}
+
+Aunque el DHT11 no es el sensor más preciso del mercado (el DHT22 o el SHT30 son
+más exactos), su simplicidad y precio lo hacen ideal para aprender los fundamentos
+de la adquisición de datos y la transmisión de sensores.
+
+
+\section{Práctica 3: Comunicaciones Inalámbricas}
+\label{sec:practica3}
+
+\subsection{Objetivos}
+
+El objetivo de esta práctica es diseñar e implementar dos aplicaciones que transmitan
+la temperatura ambiente del laboratorio a una red:
+
+\begin{enumerate}
+    \item Una aplicación basada en \textbf{Bluetooth BLE} que permita la comunicación
+    directa entre dos placas ESP32-S3 sin cables.
+    \item Una aplicación basada en \textbf{Wi-Fi} que permita acceder a la temperatura
+    mediante una petición HTTP desde cualquier dispositivo conectado a la misma red.
+\end{enumerate}
+
+\subsection{Material utilizado}
+
+\begin{itemize}
+    \item \textbf{Hardware}: Ordenador, dos placas ESP32-S3-DevKitC-1 N16R8, un sensor
+    de temperatura DHT11.
+    \item \textbf{Software}: Arduino IDE con las librerías \texttt{DHT}, \texttt{BLEDevice}
+    y \texttt{WebServer}.
+    \item \textbf{Red}: Conexión a la red inalámbrica \texttt{UPV-PSK} (o un hotspot móvil
+    como alternativa).
+\end{itemize}
+
+\subsection{Desarrollo de la práctica}
+
+\subsubsection{Primera parte: lectura del sensor DHT11}
+
+Antes de enviar datos por el aire, es necesario obtenerlos de forma fiable. El primer
+programa tiene como objetivo leer la temperatura del sensor DHT11 conectado al
+pin 2 de la ESP32 y mostrarla por el puerto serie.
+
+El código es sencillo: se inicializa el sensor, se realiza una lectura cada 2 segundos
+y se comprueba que el valor sea válido (el DHT11 puede devolver errores ocasionales
+si no se respeta el tiempo de muestreo).
+
+\begin{lstlisting}[caption={Lectura del sensor DHT11},label={lst:dht11-lectura}]
+#include <DHT.h>
+
+#define DHTPIN 2
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+  Serial.println("Sensor DHT11 inicializado.");
+}
+
+void loop() {
+  float temperatura = dht.readTemperature();
+
+  if (isnan(temperatura)) {
+    Serial.println("Error leyendo el DHT11");
+  } else {
+    Serial.print("Temperatura: ");
+    Serial.print(temperatura);
+    Serial.println(" C");
+  }
+  delay(2000);
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir fotografia del montaje fisico con la ESP32-S3 y el sensor DHT11 conectado.}\vspace{1.5cm}}}
+\caption{Montaje fisico del sensor DHT11 con la ESP32-S3}
+\label{fig:montaje-dht11}
+\end{figure}
+
+\subsubsection{Segunda parte: servidor BLE}
+
+Una vez confirmado que el sensor funciona, se implementa un \textbf{servidor BLE}
+sobre una de las ESP32-S3. Este servidor crea un servicio de temperatura con dos
+características:
+
+\begin{itemize}
+    \item \textbf{Caracteristica 1}: envia la temperatura como valor numerico (float).
+    \item \textbf{Caracteristica 2}: envia la temperatura como cadena de texto descriptiva.
+\end{itemize}
+
+Ambas caracteristicas tienen notificaciones activadas, lo que significa que cualquier
+cliente conectado recibira los datos automaticamente sin tener que solicitarlos.
+
+El servidor tambien gestiona la reconexion: si el cliente se desconecta, la ESP32
+vuelve a anunciarse (advertising) para aceptar nuevas conexiones.
+
+\begin{lstlisting}[caption={Servidor BLE de temperatura (extracto)},label={lst:ble-server}]
+// UUIDs del servicio y caracteristicas
+#define SERVICE_UUID        "8628b276-4bba-420a-ab99-dd69945408bf"
+#define CHARACTERISTIC_UUID_1 "6cb1114c-4410-4757-85af-b064b3cc689a"
+#define CHARACTERISTIC_UUID_2 "a1642e22-4f4e-41de-b173-b5bdb099f12c"
+
+// Inicializar BLE
+BLEDevice::init("ESP32_Temperatura");
+pServer = BLEDevice::createServer();
+pServer->setCallbacks(new MyServerCallbacks());
+
+BLEService *pService = pServer->createService(SERVICE_UUID);
+
+// Caracteristica numerica con notificaciones
+pCharacteristic_1 = pService->createCharacteristic(
+  CHARACTERISTIC_UUID_1,
+  BLECharacteristic::PROPERTY_NOTIFY
+);
+pBLE2902_1 = new BLE2902();
+pBLE2902_1->setNotifications(true);
+pCharacteristic_1->addDescriptor(pBLE2902_1);
+
+pService->start();
+BLEDevice::startAdvertising();
+\end{lstlisting}
+
+En el bucle principal, si hay un cliente conectado, el servidor lee el DHT11 y
+envia el valor por ambas caracteristicas:
+
+\begin{lstlisting}[caption={Envio de temperatura por BLE},label={lst:ble-envio}]
+if (deviceConnected) {
+  float temperatura = dht.readTemperature();
+  if (isnan(temperatura)) {
+    Serial.println("Error leyendo el DHT11");
+    delay(2000);
+    return;
+  }
+
+  // Enviar como valor numerico
+  pCharacteristic_1->setValue(temperatura);
+  pCharacteristic_1->notify();
+
+  // Enviar como texto descriptivo
+  String mensaje = "Temperatura actual: " + String(temperatura) + " C";
+  pCharacteristic_2->setValue(mensaje.c_str());
+  pCharacteristic_2->notify();
+
+  delay(2000);
+}
+\end{lstlisting}
+
+\subsubsection{Tercera parte: cliente BLE}
+
+La segunda ESP32-S3 actua como \textbf{cliente BLE}. Su mision es escanear el entorno
+buscando un dispositivo que anuncie el \texttt{SERVICE\_UUID} del servidor, conectarse
+a el, suscribirse a las notificaciones de una de las caracteristicas y mostrar el
+dato recibido por el puerto serie.
+
+\begin{lstlisting}[caption={Cliente BLE de temperatura (extracto)},label={lst:ble-client}]
+// UUIDs (iguales que en el servidor)
+#define SERVICE_UUID        "8628b276-4bba-420a-ab99-dd69945408bf"
+#define CHARACTERISTIC_UUID "a1642e22-4f4e-41de-b173-b5bdb099f12c"
+
+// Callback cuando se detecta el servidor
+class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
+  void onResult(BLEAdvertisedDevice advertisedDevice) {
+    if (advertisedDevice.haveServiceUUID() &&
+        advertisedDevice.isAdvertisingService(BLEUUID(SERVICE_UUID))) {
+      Serial.println("Servidor encontrado");
+      pServerAddress = new BLEAddress(advertisedDevice.getAddress());
+      doConnect = true;
+      advertisedDevice.getScan()->stop();
+    }
+  }
+};
+
+// Callback cuando llegan notificaciones
+static void notifyCallback(
+  BLERemoteCharacteristic* pBLERemoteCharacteristic,
+  uint8_t* pData, size_t length, bool isNotify) {
+  String mensaje = "";
+  for (int i = 0; i < length; i++) {
+    mensaje += (char)pData[i];
+  }
+  Serial.print("Mensaje recibido: ");
+  Serial.println(mensaje);
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla del monitor serie del cliente BLE mostrando la temperatura recibida.}\vspace{1.5cm}}}
+\caption{Monitor serie del cliente BLE recibiendo temperatura}
+\label{fig:ble-cliente-serie}
+\end{figure}
+
+\subsubsection{Cuarta parte: servidor y cliente Wi-Fi}
+
+La alternativa a BLE es utilizar \textbf{Wi-Fi} para crear una red de sensores mas
+abierta. En este caso, la ESP32-S3 que lleva el DHT11 se conecta a la red
+\texttt{UPV-PSK} y actua como \textbf{servidor web HTTP} en el puerto 80.
+
+Cada vez que un cliente visita la URL \texttt{http://IP\_DEL\_ESP32/temperatura},
+el servidor lee el sensor y responde con el valor de temperatura como texto plano.
+
+\begin{lstlisting}[caption={Servidor Wi-Fi de temperatura},label={lst:wifi-server}]
+#include <WiFi.h>
+#include <WebServer.h>
+#include <DHT.h>
+
+#define DHTPIN 2
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+
+const char* ssid = "UPV-PSK";
+const char* password = "C0n3ct4nd0s3_m0l4!";
+WebServer server(80);
+
+void handleTemperatura() {
+  float temperatura = dht.readTemperature();
+  if (isnan(temperatura)) {
+    server.send(500, "text/plain", "Error leyendo sensor");
+    return;
+  }
+  server.send(200, "text/plain", String(temperatura));
+}
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nConectado!");
+  Serial.print("IP del servidor: ");
+  Serial.println(WiFi.localIP());
+
+  server.on("/temperatura", handleTemperatura);
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+}
+\end{lstlisting}
+
+Por otro lado, la segunda ESP32 (o cualquier ordenador) actua como \textbf{cliente
+HTTP}. Se conecta a la misma red Wi-Fi, construye la URL a partir de la IP del
+servidor, realiza una peticion \texttt{GET} cada 2 segundos y muestra la respuesta.
+
+\begin{lstlisting}[caption={Cliente Wi-Fi de temperatura},label={lst:wifi-client}]
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+const char* ssid = "UPV-PSK";
+const char* password = "C0n3ct4nd0s3_m0l4!";
+const char* serverIP = "192.168.1.42";
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nConectado a la red WiFi");
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    String url = String("http://") + serverIP + "/temperatura";
+    http.begin(url);
+    int httpResponseCode = http.GET();
+
+    if (httpResponseCode > 0) {
+      String temperatura = http.getString();
+      Serial.print("Temperatura recibida: ");
+      Serial.println(temperatura + " C");
+    } else {
+      Serial.print("Error en la conexion: ");
+      Serial.println(httpResponseCode);
+    }
+    http.end();
+  }
+  delay(2000);
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla del monitor serie del cliente Wi-Fi mostrando la temperatura recibida.}\vspace{1.5cm}}}
+\caption{Monitor serie del cliente Wi-Fi recibiendo temperatura via HTTP}
+\label{fig:wifi-cliente-serie}
+\end{figure}
+
+\subsection{Problemas encontrados}
+
+Durante la practica, la conexion a la red \texttt{UPV-PSK} resulto en ocasiones
+bastante complicada. Frecuentemente aparecian \textbf{timeouts} que obligaban a
+reiniciar el proceso de conexion. Tras analizar la situacion, se concluyo que la red
+tiene un sistema de \textbf{control de acceso} que mantiene una lista de dispositivos
+admitidos. Algunos equipos quedaban en espera dentro de esta lista, lo que impedia
+que se conectaran correctamente.
+
+Como \textbf{alternativa}, se opto por utilizar el \textbf{hotspot de un telefono movil}.
+Esto permitio controlar directamente que dispositivos podian conectarse, agilizando
+el proceso y asegurando que la practica pudiera realizarse sin depender de las
+limitaciones de la red de la universidad. Esta solucion demostro ser mas fiable y
+rapida para el desarrollo de los experimentos.
+
+\subsection{Relacion teoria-practica: BLE vs. Wi-Fi en la practica}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Conexion entre conceptos teoricos y elementos de la Practica 3}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Concepto teorico} & \textbf{Observacion/aplicacion en la practica} \\
+\midrule
+Bluetooth BLE & Se implemento un servidor/periférico BLE con servicio de temperatura y un cliente/central que recibe notificaciones \\
+UUID (GATT) & Cada servicio y caracteristica tiene un UUID unico de 128 bits para identificarlos sin ambiguedad \\
+Advertising & El servidor BLE envia paquetes de anuncio para que el cliente pueda descubrirlo \\
+Notificaciones BLE & La temperatura se envia automaticamente al cliente sin que este tenga que solicitarla explicitamente \\
+Wi-Fi (modo STA) & La ESP32 se conecta a la red UPV-PSK como estacion, obteniendo una IP por DHCP \\
+Servidor HTTP & La ESP32 actua como servidor web en el puerto 80, respondiendo peticiones GET en la ruta /temperatura \\
+Cliente HTTP & La segunda ESP32 realiza peticiones GET periodicas para obtener la temperatura del servidor \\
+Red corporativa IoT & Se evidencio el problema del control de acceso en redes universitarias, resuelto con un hotspot alternativo \\
+Sensor DHT11 & Proporciona el dato de temperatura real que alimenta tanto al servidor BLE como al servidor Wi-Fi \\
+Consumo energetico & BLE consume menos que Wi-Fi, aunque en esta practica ambas placas estaban alimentadas por USB \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{Resumen de la Unidad 2}
+
+\begin{itemize}
+    \item Las \textbf{comunicaciones inalambricas} eliminan la necesidad de cableado
+    fisico, ofreciendo flexibilidad y movilidad, aunque introducen desafios como
+    interferencias, seguridad y consumo energetico.
+    \item \textbf{Bluetooth} y \textbf{Wi-Fi} comparten la banda de 2.4 GHz pero estan
+    disenados para propositos distintos: BLE es ideal para sensores de bajo consumo
+    a corta distancia, mientras que Wi-Fi proporciona mayor alcance y velocidad para
+    acceso a redes y a internet.
+    \item \textbf{BLE} organiza los datos mediante el perfil GATT, utilizando servicios
+    y caracteristicas identificados por UUIDs. Las notificaciones permiten enviar
+    datos de forma automatica sin polling.
+    \item \textbf{Wi-Fi} en sistemas embebidos permite crear servidores HTTP que
+    exponen datos de sensores a traves de peticiones web estandar, facilitando la
+    integracion con aplicaciones y plataformas en la nube.
+    \item La \textbf{Practica 3} demuestra la viabilidad de ambas tecnologias para
+    transmitir datos de temperatura en tiempo real, comparando el enfoque punto a
+    punto de BLE con el enfoque cliente-servidor web de Wi-Fi.
+    \item Las \textbf{redes corporativas IoT} pueden presentar barreras de acceso
+    (control de dispositivos, timeouts) que requieren soluciones alternativas como
+    hotspots moviles para el desarrollo de prototipos.
+\end{itemize}

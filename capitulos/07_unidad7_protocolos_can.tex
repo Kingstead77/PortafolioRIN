@@ -1,0 +1,861 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         CAPITULO 7
+%           Protocolos de Comunicacion y Redes CAN
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Protocolos de Comunicacion y Redes CAN}
+
+Hasta ahora hemos visto como se comunican dispositivos mediante UART, RS-232,
+Wi-Fi, Bluetooth y redes TCP/IP. En el entorno industrial, sin embargo, existen
+protocolos especificos diseñados para conectar sensores, actuadores, PLCs y
+sistemas de control en tiempo real. Estos protocolos deben ser robustos, rapidos
+y capaces de operar en entornos con ruido electrico y grandes distancias.
+
+En este capitulo estudiamos los protocolos de comunicacion mas relevantes en
+la industria: I2C, SPI, RS-485, Modbus y CAN. Cada uno tiene sus ventajas y
+se emplea segun las necesidades de velocidad, distancia, numero de nodos y
+fiabilidad del sistema.
+
+
+%=============================================================================
+\section{I2C: Inter-Integrated Circuit}
+%=============================================================================
+
+\subsection{Que es I2C}
+
+El bus I2C (abreviatura de \textit{Inter-Integrated Circuits}) es un protocolo de
+comunicacion serie sincrona desarrollado por Philips en 1982. Se diseño para
+conectar circuitos integrados de baja velocidad dentro de un mismo dispositivo
+o placa, como microcontroladores, sensores, memorias EEPROM y pantallas.
+
+\begin{definicion}[I2C]
+El \textbf{bus I2C} es un protocolo de comunicacion serie sincrono que utiliza
+dos lineas para transmitir datos entre dispositivos: una linea de reloj (SCL) y
+una linea de datos (SDA). Permite la conexion de multiples dispositivos en una
+arquitectura de bus con multiples maestros y multiples esclavos.
+\end{definicion}
+
+La principal ventaja del I2C es su sencillez: solo necesita dos lineas de senal
+mas masa (GND), lo que reduce el numero de pines necesarios en los
+microcontroladores. Ademas, al ser un bus multi-maestro, cualquier dispositivo
+conectado puede iniciar una transferencia si el bus esta libre.
+
+\subsection{Senalizacion}
+
+El bus I2C utiliza tres conexiones basicas:
+
+\begin{itemize}
+    \item \textbf{SCL} (\textit{System Clock}): linea de reloj que sincroniza la
+    comunicacion entre todos los dispositivos. El maestro genera los pulsos de
+    reloj.
+    \item \textbf{SDA} (\textit{System Data}): linea de datos por la que se
+    transfieren los bits de informacion entre maestro y esclavo.
+    \item \textbf{GND} (Masa): referencia de tension comun para todos los
+    dispositivos conectados al bus.
+\end{itemize}
+
+Ambas lineas (SCL y SDA) son \textit{open-drain} o \textit{open-collector}, lo que
+significa que cada dispositivo solo puede poner la linea a nivel bajo (0) o
+liberarla (1). Por eso se necesitan resistencias de pull-up externas
+conectadas a la alimentacion (tipicamente 4.7 k$\Omega$ a 3.3 V o 5 V).
+
+% TODO: imagen
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{
+        \centering
+        \vspace{1cm}
+        TODO: Esquema del bus I2C con maestro, dos esclavos y resistencias de pull-up.
+        \vspace{1cm}
+    }}
+    \caption{Esquema basico del bus I2C con resistencias de pull-up.}
+    \label{fig:i2c_esquema}
+\end{figure}
+
+\subsection{Transferencia de datos}
+
+La comunicacion en I2C siempre la inicia un \textbf{maestro}. Cada esclavo tiene
+una direccion unica de 7 bits (o 10 bits en modo extendido), que el maestro
+envia al principio de cada transaccion.
+
+\textbf{Escritura en un dispositivo esclavo:}
+
+\begin{enumerate}
+    \item El maestro envia una \textbf{condicion de inicio} (START): SDA pasa de
+    alto a bajo mientras SCL permanece en alto.
+    \item Envio de la \textbf{direccion del esclavo} (7 bits) mas el bit de
+    lectura/escritura (0 = escritura).
+    \item El esclavo responde con un bit de \textbf{reconocimiento} (ACK).
+    \item El maestro envia la \textbf{direccion del registro interno} donde quiere
+    escribir.
+    \item El esclavo responde con ACK.
+    \item El maestro envia el \textbf{byte de dato}.
+    \item El esclavo responde con ACK.
+    \item [Opcionalmente] se pueden enviar mas bytes de datos.
+    \item El maestro envia una \textbf{condicion de parada} (STOP): SDA pasa de
+    bajo a alto mientras SCL esta en alto.
+\end{enumerate}
+
+\textbf{Lectura desde un dispositivo esclavo:}
+
+\begin{enumerate}
+    \item Condicion de inicio (START).
+    \item Direccion del esclavo con bit de escritura (0).
+    \item ACK del esclavo.
+    \item Envio de la direccion del registro interno a leer.
+    \item ACK del esclavo.
+    \item \textbf{Condicion de inicio reiterada} (Repeated START).
+    \item Direccion del esclavo con bit de lectura (1).
+    \item ACK del esclavo.
+    \item El esclavo envia el \textbf{byte de dato}.
+    \item El maestro responde con ACK (si quiere leer mas) o NACK (fin de lectura).
+    \item Condicion de parada (STOP).
+\end{enumerate}
+
+\subsection{Ejemplo practico: sensor brujula digital CMPS03}
+
+El sensor CMPS03 es una brujula digital que mide el campo magnetico terrestre
+para determinar la orientacion. Una vez calibrado, ofrece una precision de 3 a 4
+grados con resolucion de decimas.
+
+Este sensor dispone de dos interfaces de salida:
+\begin{itemize}
+    \item \textbf{PWM} (modulacion en anchura de pulso): un pin genera pulsos cuya
+    duracion es proporcional al angulo.
+    \item \textbf{I2C}: permite leer el angulo directamente como un byte (0--255)
+    o como dos bytes (0--3599, resolucion de 0.1 grados).
+\end{itemize}
+
+Para leer el angulo por I2C, el procedimiento es:
+\begin{enumerate}
+    \item Enviar START y la direccion del CMPS03 (0xC0) con bit de escritura.
+    \item Enviar la direccion del registro interno 0x01 (angulo en 0--255).
+    \item Enviar Repeated START.
+    \item Enviar la direccion del CMPS03 (0xC1) con bit de lectura.
+    \item Leer el byte de dato que contiene el angulo.
+    \item Enviar STOP.
+\end{enumerate}
+
+
+%=============================================================================
+\section{SPI: Serial Peripheral Interface}
+%=============================================================================
+
+\subsection{Que es SPI}
+
+SPI es un protocolo de comunicacion serie sincrona desarrollado por Motorola en
+1982. A diferencia de I2C, SPI esta pensado para alcanzar velocidades muy
+superiores y opera en modo \textbf{full-duplex}, lo que significa que puede enviar
+y recibir datos simultaneamente.
+
+\begin{definicion}[SPI]
+El \textbf{bus SPI} (\textit{Serial Peripheral Interface}) es un protocolo de
+comunicacion serie sincrona de cuatro hilos que permite la transmision full-duplex
+entre un dispositivo maestro y uno o varios esclavos. Utiliza lineas separadas
+para reloj (SCK), datos de salida (MOSI), datos de entrada (MISO) y seleccion de
+esclavo (SS).
+\end{definicion}
+
+SPI se utiliza habitualmente para comunicar un microcontrolador con perifericos
+de alta velocidad como memorias Flash, pantallas TFT, convertidores ADC/DAC y
+modulos de comunicacion.
+
+\subsection{Senales del bus SPI}
+
+Un bus SPI completo utiliza cuatro lineas:
+
+\begin{itemize}
+    \item \textbf{SCK} (\textit{Serial Clock}): senal de reloj generada por el
+    maestro. Sincroniza la transmision de datos.
+    \item \textbf{MOSI} (\textit{Master Out Slave In}): linea de datos del
+    maestro al esclavo. El maestro envia informacion por esta linea.
+    \item \textbf{MISO} (\textit{Master In Slave Out}): linea de datos del
+    esclavo al maestro. El esclavo responde por esta linea.
+    \item \textbf{SS} o \textbf{CS} (\textit{Slave Select} / \textit{Chip
+    Select}): linea de control que el maestro utiliza para seleccionar a que
+    esclavo se dirige. Normalmente activa en nivel bajo.
+\end{itemize}
+
+% TODO: imagen
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{
+        \centering
+        \vspace{1cm}
+        TODO: Esquema SPI con maestro, dos esclavos y lineas SCK, MOSI, MISO, SS.
+        \vspace{1cm}
+    }}
+    \caption{Esquema del bus SPI con un maestro y dos esclavos.}
+    \label{fig:spi_esquema}
+\end{figure}
+
+\subsection{Funcionamiento}
+
+En SPI, el maestro siempre genera el reloj (SCK). En cada pulso de reloj, se
+transfiere un bit en ambas direcciones simultaneamente: un bit sale por MOSI
+y otro entra por MISO. Esto permite el modo full-duplex.
+
+El maestro debe conocer de antemano cuantos bits espera recibir del esclavo,
+porque debe mantener el reloj activo durante toda la transferencia. Si el esclavo
+necesita tiempo para preparar la respuesta, el maestro puede introducir
+pequenas pausas entre bytes.
+
+\textbf{Seleccion de esclavo:}
+
+Existen dos formas de conectar multiples esclavos:
+
+\begin{enumerate}
+    \item \textbf{SS independiente}: cada esclavo tiene su propia linea SS
+    conectada al maestro. El maestro activa (baja) solo la linea del esclavo
+    con el que quiere comunicarse.
+    \item \textbf{Conexion en cascada (daisy chain)}: los esclavos se conectan
+    en serie. El maestro envia datos a traves de todos los esclavos
+    consecutivamente, como una cadena de registros de desplazamiento.
+\end{enumerate}
+
+\subsection{Comparacion: SPI vs I2C vs UART}
+
+\begin{table}[H]
+    \centering
+    \caption{Comparativa de protocolos de comunicacion serie}
+    \label{tab:comparativa_spi_i2c_uart}
+    \small
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        \textbf{Caracteristica} & \textbf{SPI} & \textbf{I2C} & \textbf{UART} \\
+        \hline
+        Tipo de senal & Sincrona & Sincrona & Asincrona \\
+        \hline
+        Modo duplex & Full-duplex & Half-duplex & Full-duplex \\
+        \hline
+        Numero de lineas & 4 (o mas) & 2 & 2 (TX/RX) \\
+        \hline
+        Velocidad tipica & Hasta 10+ Mbps & Hasta 3.4 Mbps & Hasta 1 Mbps \\
+        \hline
+        Maestros & Uno (tipico) & Multiples & Ninguno (peer-to-peer) \\
+        \hline
+        Esclavos & Multiples (por SS) & Multiples (por direccion) & 1 \\
+        \hline
+        Direccionamiento & Por linea SS & Por direccion 7/10 bits & Ninguno \\
+        \hline
+        Distancia & Corta (placa) & Corta (placa) & Media (15 m RS-232) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\textbf{Ventajas de SPI:}
+\begin{itemize}
+    \item Mayor velocidad que I2C y UART.
+    \item Full-duplex: envia y recibe simultaneamente.
+    \item El tamano de los mensajes puede ser arbitrario.
+    \item Hardware sencillo y de bajo coste.
+    \item Los esclavos no necesitan oscilador propio (el reloj lo genera el maestro).
+\end{itemize}
+
+\textbf{Desventajas de SPI:}
+\begin{itemize}
+    \item Necesita mas pines que I2C (especialmente si hay muchos esclavos).
+    \item No hay confirmacion de recepcion por parte del esclavo (no hay ACK).
+    \item Solo admite un maestro en la mayoria de implementaciones.
+    \item Distancias muy cortas (dentro de la misma placa).
+    \item El maestro debe conocer de antemano la longitud de la respuesta.
+\end{itemize}
+
+
+%=============================================================================
+\section{RS-485: Comunicacion diferencial robusta}
+%=============================================================================
+
+\subsection{Introduccion}
+
+RS-485 es un estandar de comunicacion serie muy utilizado en aplicaciones de
+adquisicion de datos y control industrial. Su principal ventaja es la capacidad
+de conectar multiples dispositivos en el mismo bus (hasta 32 transmisores y 32
+receptores tipicamente) sobre distancias de hasta 1200 metros.
+
+\begin{definicion}[RS-485]
+El estandar \textbf{RS-485} (tambien conocido como EIA-485) define una interfaz
+de comunicacion serie multipunto con transmision diferencial balanceada. Permite
+la conexion de multiples transmisores y receptores en un bus semiduplex, siendo
+altamente resistente al ruido electrico y apto para largas distancias.
+\end{definicion}
+
+\subsection{Caracteristicas principales}
+
+Las caracteristicas mas destacadas de RS-485 son:
+
+\begin{itemize}
+    \item \textbf{Transmision diferencial}: los datos se envian mediante un par
+    trenzado de hilos (A y B). Un hilo transmite la senal original y el otro su
+    copia invertida. El receptor detecta la \textbf{diferencia de voltaje} entre
+    ambos, lo que elimina el ruido comun que afecta por igual a ambos hilos.
+    \item \textbf{Multipunto}: permite conectar hasta 32 dispositivos (transmisores
+    y receptores) en el mismo bus. Con repetidores o transceivers avanzados se
+    puede extender a mas nodos.
+    \item \textbf{Semiduplex}: los dispositivos pueden enviar y recibir, pero no
+    simultaneamente. En un instante dado, solo un equipo puede transmitir,
+    mientras que todos los demas pueden recibir.
+    \item \textbf{Inmunidad al ruido}: la transmision diferencial y el uso de par
+    trenzado (a veces blindado) garantizan una alta resistencia a
+    interferencias electromagneticas.
+\end{itemize}
+
+\subsection{Niveles de senal y cableado}
+
+En RS-485, el estado logico se determina por la diferencia de voltaje entre las
+lineas A y B:
+
+\begin{itemize}
+    \item \textbf{Bit 1 (Marca / recessive)}: $V_A - V_B < -200$ mV.
+    \item \textbf{Bit 0 (Espacio / dominant)}: $V_A - V_B > +200$ mV.
+\end{itemize}
+
+El cableado basico consiste en un par trenzado para los datos (A y B), mas
+lineas opcionales de alimentacion (0 V y 5 V) para alimentar dispositivos del
+bus. Es recomendable colocar \textbf{terminaciones de linea} (resistencias de 120
+$\Omega$) al principio y al final del bus para evitar reflexiones de senal.
+
+% TODO: imagen
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{
+        \centering
+        \vspace{1cm}
+        TODO: Esquema de bus RS-485 con par trenzado, terminaciones de 120 Ohm
+        y varios nodos conectados.
+        \vspace{1cm}
+    }}
+    \caption{Topologia tipica de un bus RS-485 con terminaciones.}
+    \label{fig:rs485_topologia}
+\end{figure}
+
+\subsection{Distancia vs velocidad}
+
+Una regla practica en RS-485 es que el producto de la longitud del cable (en
+metros) por la velocidad de datos (en bits por segundo) no debe superar
+$10^8$:
+
+\begin{equation}
+    \mathrm{Longitud\,(m)} \times \mathrm{Velocidad\,(bps)} \leq 10^8
+\end{equation}
+
+\begin{table}[H]
+    \centering
+    \caption{Relacion entre distancia y velocidad en RS-485}
+    \label{tab:rs485_distancia}
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Distancia} & \textbf{Velocidad maxima aproximada} \\
+        \hline
+        15 m & 10 Mbps \\
+        \hline
+        100 m & 1 Mbps \\
+        \hline
+        500 m & 200 kbps \\
+        \hline
+        1200 m & 100 kbps \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{RS-232 vs RS-485}
+
+\begin{table}[H]
+    \centering
+    \caption{Comparativa entre RS-232 y RS-485}
+    \label{tab:rs232_vs_rs485}
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textbf{Caracteristica} & \textbf{RS-232} & \textbf{RS-485} \\
+        \hline
+        Tipo de comunicacion & Punto a punto & Multipunto \\
+        \hline
+        Duplex & Full-duplex & Semiduplex \\
+        \hline
+        Tipo de senal & Desbalanceada (unipolar) & Balanceada (diferencial) \\
+        \hline
+        Niveles de voltaje & $\pm 3$ V a $\pm 15$ V & Diferencial 200 mV \\
+        \hline
+        Max. dispositivos & 1 TX + 1 RX & 32 TX + 32 RX (estandar) \\
+        \hline
+        Velocidad maxima & 1 Mbps a 15 m & 10 Mbps a 15 m \\
+        \hline
+        Distancia maxima & $\sim$ 15 m & $\sim$ 1200 m a 100 kbps \\
+        \hline
+        Inmunidad al ruido & Baja & Alta \\
+        \hline
+        Lineas de control & DTR, DSR, RTS, CTS & Ninguna (solo datos) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+%=============================================================================
+\section{Modbus: protocolo de comunicacion industrial}
+%=============================================================================
+
+\subsection{Que es Modbus}
+
+Modbus es uno de los protocolos de comunicacion mas extendidos en la
+automatizacion industrial. Fue desarrollado en 1979 por Modicon (hoy Schneider
+Electric) para su gama de PLCs. Hoy en dia es un estandar abierto que permite
+la comunicacion entre controladores, sensores, actuadores y sistemas SCADA.
+
+\begin{definicion}[Modbus]
+El protocolo \textbf{Modbus} es un protocolo de comunicacion abierto para la
+transmision de datos entre dispositivos electronicos en entornos industriales.
+Se situa en los niveles 1, 2 y 7 del modelo OSI. Funciona sobre arquitectura
+maestro/esclavo (en RTU) o cliente/servidor (en TCP/IP).
+\end{definicion}
+
+Modbus es independiente del medio fisico: puede funcionar sobre RS-232,
+RS-485, Ethernet TCP/IP, o incluso por radio. Esto lo hace extremadamente
+versatil.
+
+\subsection{Variantes de Modbus}
+
+A lo largo de los años han aparecido diferentes variantes de Modbus adaptadas a
+diversos medios fisicos:
+
+\begin{table}[H]
+    \centering
+    \caption{Variantes del protocolo Modbus}
+    \label{tab:modbus_variantes}
+    \begin{tabular}{|l|p{8cm}|}
+        \hline
+        \textbf{Variante} & \textbf{Descripcion} \\
+        \hline
+        Modbus RTU & Implementacion mas comun. Usa comunicacion serie (RS-232/RS-485)
+        con representacion binaria compacta de los datos. Requiere CRC para
+        verificacion. \\
+        \hline
+        Modbus ASCII & Usa comunicacion serie con caracteres ASCII. Mas lento que
+        RTU. Utiliza checksum LRC. \\
+        \hline
+        Modbus TCP/IP & Funciona sobre Ethernet TCP/IP, puerto 502. No requiere
+        checksum adicional porque TCP ya lo proporciona. \\
+        \hline
+        Modbus RTU sobre IP & Similar a Modbus TCP pero incluye CRC en la carga
+        util, como en RTU. \\
+        \hline
+        Modbus UDP & Variante experimental sobre UDP para reducir overhead. \\
+        \hline
+        Modbus Plus (MB+) & Version propietaria de Schneider Electric. Soporta
+        comunicacion peer-to-peer entre multiples maestros. Requiere hardware
+        especial (co-procesador HDLC). \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Modbus RTU en detalle}
+
+Modbus RTU (\textit{Remote Terminal Unit}) es la variante mas utilizada en el
+entorno industrial. Se basa en una arquitectura \textbf{maestro-esclavo} sobre
+un bus serie (generalmente RS-485).
+
+\textbf{Estructura de la trama RTU:}
+
+\begin{table}[H]
+    \centering
+    \caption{Formato de trama Modbus RTU}
+    \label{tab:modbus_trama}
+    \begin{tabular}{|l|c|p{6cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tamano} & \textbf{Descripcion} \\
+        \hline
+        Direccion del esclavo & 1 byte & Identifica el dispositivo destino (1--247) \\
+        \hline
+        Codigo de funcion & 1 byte & Indica la operacion a realizar (leer, escribir, etc.) \\
+        \hline
+        Datos & N bytes & Parametros de la funcion y valores \\
+        \hline
+        CRC & 2 bytes & Codigo de redundancia ciclica para deteccion de errores \\
+        \hline
+    \end{tabular}
+\end{table}
+
+El dispositivo \textbf{maestro} (por ejemplo un PLC o sistema SCADA) inicia la
+comunicacion enviando una trama al esclavo. Solo el esclavo con la direccion
+indicada responde. Los demas escuchan pero ignoran el mensaje.
+
+\textbf{Codigos de funcion mas comunes:}
+\begin{itemize}
+    \item \textbf{01}: Leer bobinas (coils) -- salidas digitales.
+    \item \textbf{02}: Leer entradas digitales.
+    \item \textbf{03}: Leer registros de retencion (holding registers) -- 16 bits.
+    \item \textbf{04}: Leer registros de entrada (input registers).
+    \item \textbf{05}: Escribir una bobina.
+    \item \textbf{06}: Escribir un registro de retencion.
+    \item \textbf{15}: Escribir multiples bobinas.
+    \item \textbf{16}: Escribir multiples registros.
+\end{itemize}
+
+\subsection{RS-232 vs RS-485 en Modbus}
+
+La eleccion entre RS-232 y RS-485 depende de las necesidades de la aplicacion:
+
+\begin{itemize}
+    \item \textbf{RS-232}: adecuado para conexiones punto a punto a corta distancia
+    (hasta 15 m). Usa conectores DB9 o DB25. Ideal para conectar un PLC
+    directamente a un panel HMI o a un PC de programacion.
+    \item \textbf{RS-485}: emplea un esquema de bus multidrop que permite conectar
+    multiples dispositivos en la misma linea. Ideal para distancias largas
+    (hasta 1200 m) y entornos con ruido electrico. Es el estandar de facto en
+    redes de campo industriales.
+\end{itemize}
+
+
+%=============================================================================
+\section{CAN: Controller Area Network}
+%=============================================================================
+
+\subsection{Introduccion}
+
+CAN (\textit{Controller Area Network}) es un bus de comunicaciones serie
+diseñado originalmente por Bosch en 1986 para la industria automotriz. Hoy en
+dia es un estandar internacional (ISO 11898) y se emplea ampliamente en
+automocion, maquinaria industrial, robots, sistemas medicos y avionica.
+
+\begin{definicion}[CAN]
+El \textbf{bus CAN} (\textit{Controller Area Network}) es un protocolo de
+comunicacion de datos en serie de alta integridad para aplicaciones en tiempo
+real. Utiliza un bus de dos hilos con arbitraje basado en prioridad, difusion de
+mensajes, y excelentes capacidades de deteccion de errores y confinamiento de
+fallos.
+\end{definicion}
+
+CAN se distingue de otros protocolos porque no utiliza direcciones de nodo.
+En su lugar, cada mensaje lleva un \textbf{identificador} que define tanto la
+prioridad como el contenido del mensaje. Cualquier nodo puede enviar un
+mensaje cuando el bus esta libre, y todos los demas nodos reciben ese mensaje,
+decidiendo individualmente si les interesa o no.
+
+\subsection{Caracteristicas principales}
+
+Las caracteristicas mas destacadas de CAN son:
+
+\begin{itemize}
+    \item \textbf{Acceso multi-maestro}: cualquier nodo puede iniciar la
+    transmision cuando el bus esta libre.
+    \item \textbf{Difusion de mensajes} (broadcast): todos los nodos reciben cada
+    mensaje. No hay comunicacion punto a punto.
+    \item \textbf{Prioridad de mensajes}: el identificador determina la prioridad.
+    Los mensajes con identificador mas bajo tienen mayor prioridad.
+    \item \textbf{Longitud limitada}: hasta 8 bytes de datos por mensaje.
+    \item \textbf{Velocidad}: hasta 1 Mbit/s en distancias cortas (hasta 40 m a 1
+    Mbps; 125 kbps a 500 m aproximadamente).
+    \item \textbf{Deteccion de errores}: mecanismos de supervision de bits,
+    CRC, reconocimiento y relleno de bits garantizan una tasa de error
+    residual extremadamente baja.
+\end{itemize}
+
+\subsection{Tipos de tramas CAN}
+
+En CAN existen cuatro tipos de tramas:
+
+\begin{enumerate}
+    \item \textbf{Trama de datos}: transmite un mensaje al bus. Contiene el
+    identificador, los datos (0--8 bytes) y campos de control y CRC.
+    \item \textbf{Trama remota}: solicita la transmision de un mensaje con un
+    identificador especifico. Un nodo que produzca ese mensaje respondera
+    enviando la trama de datos correspondiente.
+    \item \textbf{Trama de error}: cualquier nodo que detecte una condicion de
+    error envia una trama de error para notificar a todos los demas nodos.
+    \item \textbf{Trama de sobrecarga}: similar a la trama de error, pero indica
+    que un nodo no esta listo para recibir mas datos y necesita un retraso.
+\end{enumerate}
+
+\subsection{Formato de trama de datos}
+
+Una trama de datos CAN (formato estandar con identificador de 11 bits) contiene
+los siguientes campos:
+
+\begin{table}[H]
+    \centering
+    \caption{Campos de una trama de datos CAN (formato estandar)}
+    \label{tab:can_trama}
+    \begin{tabular}{|l|c|p{6cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Bits} & \textbf{Descripcion} \\
+        \hline
+        Inicio de trama (SOF) & 1 & Bit dominante que marca el inicio \\
+        \hline
+        Identificador + RTR & 12 & 11 bits de ID + 1 bit RTR (Remote Transmission Request) \\
+        \hline
+        Control & 6 & Indica tamano de datos y formato (estandar/extendido) \\
+        \hline
+        Datos & 0--64 & De 0 a 8 bytes de informacion util \\
+        \hline
+        CRC & 15 + 1 & Codigo de redundancia ciclica + delimitador \\
+        \hline
+        ACK & 2 & Ventana de reconocimiento por parte de los receptores \\
+        \hline
+        Fin de trama (EOF) & 7 & Bits recesivos que marcan el final \\
+        \hline
+        Intermission (IFS) & 3 & Tiempo minimo entre tramas \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\textbf{Formato estandar vs extendido:}
+
+\begin{itemize}
+    \item \textbf{CAN estandar} (CAN 2.0A): identificador de 11 bits (2048
+    mensajes posibles, aunque algunos IDs estan reservados).
+    \item \textbf{CAN extendido} (CAN 2.0B): identificador de 29 bits (mas de 500
+    millones de mensajes posibles).
+\end{itemize}
+
+Ambos formatos pueden coexistir en el mismo bus. La distincion se realiza
+mediante el bit \textbf{IDE} (Identifier Extension).
+
+\subsection{Arbitraje de bus: dominante y recesivo}
+
+CAN utiliza un mecanismo de arbitraje \textbf{no destructivo} basado en los
+niveles logicos del bus:
+
+\begin{itemize}
+    \item \textbf{Nivel dominante} (0 logico): el estado que impone su valor
+    cuando un nodo lo transmite.
+    \item \textbf{Nivel recesivo} (1 logico): el estado que solo se mantiene si
+    \textit{ningun} nodo transmite un dominante.
+\end{itemize}
+
+El bus CAN es como una \textbf{AND cableada}: si un nodo pone dominante y otro
+recesivo, el resultado es dominante. Esto permite que varios nodos comiencen a
+transmitir simultaneamente, pero solo el que envie el mensaje con el
+\textbf{identificador mas bajo} (mas dominantes en los primeros bits) gane el
+arbitraje.
+
+\textbf{Proceso de arbitraje:}
+\begin{enumerate}
+    \item Dos o mas nodos detectan que el bus esta libre y comienzan a transmitir
+    al mismo tiempo.
+    \item Cada nodo envia su identificador bit a bit.
+    \item Cada nodo transmisor supervisa el nivel real del bus.
+    \item Si un nodo envia un recesivo (1) pero ve un dominante (0) en el bus,
+    significa que otro nodo tiene un identificador con mayor prioridad (ID mas
+    bajo). Este nodo se retira y pasa a modo receptor.
+    \item El nodo con el ID mas bajo gana el arbitraje y continua transmitiendo
+    sin perdida de tiempo ni datos.
+    \item Los nodos que perdieron reintentaran automaticamente cuando el bus vuelva
+    a estar libre.
+\end{enumerate}
+
+% TODO: imagen
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{
+        \centering
+        \vspace{1cm}
+        TODO: Diagrama temporal de arbitraje CAN con dos nodos compitiendo.
+        Nodo A (ID 0x123) gana sobre Nodo B (ID 0x456).
+        \vspace{1cm}
+    }}
+    \caption{Arbitraje no destructivo en el bus CAN.}
+    \label{fig:can_arbitraje}
+\end{figure}
+
+\subsection{Supervision de bits y relleno de bits}
+
+\textbf{Supervision de bits (bit monitoring):}
+Cada nodo transmisor supervisa el nivel del bus bit a bit y lo compara con lo
+que el mismo esta enviando. Si detecta una discrepancia, sabe que ha ocurrido
+un error (o que perdio el arbitraje).
+
+\textbf{Relleno de bits (bit stuffing):}
+Para garantizar suficientes transiciones en el bus (necesarias para la
+sincronizacion), CAN inserta un bit de polaridad opuesta despues de 5 bits
+consecutivos del mismo valor. Este bit de relleno es transparente para la capa
+superior y se elimina en recepcion.
+
+La longitud de la trama varia debido al relleno. En el peor caso (identificador
+de 11 bits, datos maximos):
+
+\begin{table}[H]
+    \centering
+    \caption{Longitud de trama CAN con relleno de bits}
+    \label{tab:can_longitud}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Datos} & \textbf{Sin relleno} & \textbf{Promedio} & \textbf{Peor caso} \\
+        \hline
+        0 bytes & 47 bits & 49 bits & 55 bits \\
+        \hline
+        8 bytes & 111 bits & 114 bits & 135 bits \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Errores y confinamiento de fallos}
+
+CAN dispone de sofisticados mecanismos para detectar y gestionar errores:
+
+\textbf{Tipos de errores:}
+\begin{enumerate}
+    \item \textbf{Error de bit}: un transmisor envia un bit pero lee el nivel
+    opuesto en el bus.
+    \item \textbf{Error de relleno}: se detectan 6 bits consecutivos del mismo
+    valor.
+    \item \textbf{Error CRC}: el calculo CRC del receptor no coincide con el
+    campo CRC recibido.
+    \item \textbf{Error de formato}: bits de formato fijo en posiciones incorrectas.
+    \item \textbf{Error de reconocimiento (ACK)}: ningun receptor envio un ACK
+    dominante.
+\end{enumerate}
+
+\textbf{Confinamiento de fallos (fault confinement):}
+Cada nodo CAN mantiene dos contadores de errores:
+\begin{itemize}
+    \item \textbf{TEC} (\textit{Transmit Error Counter}): cuenta errores en
+    transmision.
+    \item \textbf{REC} (\textit{Receive Error Counter}): cuenta errores en
+    recepcion.
+\end{itemize}
+
+Segun el valor de estos contadores, un nodo puede estar en tres estados:
+\begin{enumerate}
+    \item \textbf{Activo} (Error Active): estado normal. El nodo puede enviar
+    tramas de error activas (6 bits dominantes).
+    \item \textbf{Pasivo} (Error Passive): cuando un contador supera 127. El nodo
+    solo puede enviar tramas de error pasivas (6 bits recesivos) y debe esperar
+    8 bits adicionales antes de retransmitir.
+    \item \textbf{Bus Off}: cuando TEC supera 255. El nodo se desconecta del bus
+    y no puede transmitir ni recibir hasta que el problema se resuelva.
+\end{enumerate}
+
+Este sistema de \textbf{voto mayoritario} asegura que un nodo defectuoso no
+sature el bus con tramas de error, protegiendo al resto de la red.
+
+\subsection{Topologia y cableado}
+
+CAN utiliza una \textbf{topologia de bus} con dos lineas principales:
+
+\begin{itemize}
+    \item \textbf{CAN\_H}: linea de bus en estado dominante alto.
+    \item \textbf{CAN\_L}: linea de bus en estado dominante bajo.
+\end{itemize}
+
+El bus debe terminarse en ambos extremos con resistencias de 120 $\Omega$ para
+evitar reflexiones. En topologias cortas, una sola terminacion puede bastar.
+
+% TODO: imagen
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{
+        \centering
+        \vspace{1cm}
+        TODO: Topologia de bus CAN con terminaciones, nodos conectados y
+        conector DB9 con pines CAN\_H, CAN\_L, CAN\_GND y CAN\_SHLD.
+        \vspace{1cm}
+    }}
+    \caption{Topologia de bus CAN segun la norma ISO 11898.}
+    \label{fig:can_topologia}
+\end{figure}
+
+\textbf{Conector DB9 comun en CAN:}
+
+\begin{table}[H]
+    \centering
+    \caption{Asignacion de pines en conector DB9 para CAN}
+    \label{tab:can_db9}
+    \begin{tabular}{|c|l|l|}
+        \hline
+        \textbf{Pin} & \textbf{Senal} & \textbf{Descripcion} \\
+        \hline
+        2 & CAN\_L & Linea de bus CAN (bajo dominante) \\
+        \hline
+        3 & CAN\_GND & Masa de referencia CAN \\
+        \hline
+        5 & CAN\_SHLD & Blindaje opcional \\
+        \hline
+        7 & CAN\_H & Linea de bus CAN (alto dominante) \\
+        \hline
+        9 & CAN\_V+ & Alimentacion externa opcional \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Controladores CAN: Basic vs Full CAN}
+
+Los chips controladores CAN se clasifican en dos categorias:
+
+\begin{itemize}
+    \item \textbf{Basic CAN}: ofrece un buffer de recepcion FIFO y un buffer de
+    transmision. Es una solucion de bajo coste, pero requiere que el CPU atienda
+    rapidamente los mensajes para no perder datos en redes con mucho trafico.
+    \item \textbf{Full CAN}: proporciona multiples buffers de mensaje programables
+    (tanto para recepcion como para transmision). El controlador puede filtrar
+    mensajes por identificador y almacenarlos en buffers dedicados sin
+    intervencion del CPU. Permite gestionar alto trafico de CAN con bajo
+    rendimiento de CPU.
+\end{itemize}
+
+La mayoria de los microcontroladores modernos integran un controlador CAN Full
+o al menos Basic CAN, lo que facilita su uso en aplicaciones industriales sin
+necesidad de hardware externo.
+
+\subsection{Resumen: SPI, I2C, RS-485, Modbus y CAN}
+
+\begin{table}[H]
+    \centering
+    \caption{Resumen comparativo de protocolos industriales}
+    \label{tab:resumen_protocolos}
+    \small
+    \begin{tabular}{|l|c|c|c|c|c|}
+        \hline
+        \textbf{Caracteristica} & \textbf{I2C} & \textbf{SPI} & \textbf{RS-485} & \textbf{Modbus} & \textbf{CAN} \\
+        \hline
+        Tipo & Sincrono & Sincrono & Diferencial & Protocolo & Bus serie \\
+        \hline
+        Duplex & Half & Full & Half & Half/Full & Half \\
+        \hline
+        Nodos & 127 (7 bits) & Limitado por SS & 32+ & 247 (RTU) & Ilimitado \\
+        \hline
+        Distancia & Corta (placa) & Corta (placa) & 1200 m & 1200 m & 500 m+ \\
+        \hline
+        Velocidad & 3.4 Mbps & 10+ Mbps & 10 Mbps & 115.2 kbps & 1 Mbps \\
+        \hline
+        Arbitraje & Software & SS hardware & Maestro unico & Master/slave & No destructivo \\
+        \hline
+        Deteccion errores & ACK & Ninguna & CRC/paridad & CRC (RTU) & CRC + bit stuff \\
+        \hline
+        Uso tipico & Sensores, EEPROM & Pantallas, Flash & Redes de campo & PLCs, SCADA & Automocion, robots \\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+%=============================================================================
+\section{Resumen de la Unidad 7}
+%=============================================================================
+
+En este capitulo hemos estudiado los protocolos de comunicacion mas
+relevantes para la interconexion de dispositivos en entornos industriales:
+
+\begin{enumerate}
+    \item \textbf{I2C} es un bus sincrono de dos hilos (SDA, SCL) que permite
+    conectar multiples maestros y esclavos en cortas distancias. Es ideal para
+    sensores y circuitos integrados dentro de una placa.
+
+    \item \textbf{SPI} es un bus sincrono de cuatro hilos (SCK, MOSI, MISO, SS)
+    que opera en full-duplex a muy alta velocidad. Perfecto para perifericos
+    rapidos como memorias Flash o pantallas.
+
+    \item \textbf{RS-485} es un estandar electrico de transmision diferencial
+    balanceada que permite conectar hasta 32 dispositivos en un bus de hasta
+    1200 m. Es la base fisica de muchas redes industriales.
+
+    \item \textbf{Modbus} es un protocolo de aplicacion abierto muy utilizado en
+    automatizacion. Funciona sobre RS-232, RS-485 o TCP/IP, con arquitectura
+    maestro/esclavo en RTU y cliente/servidor en TCP.
+
+    \item \textbf{CAN} es un bus de comunicacion de alta fiabilidad con
+    arbitraje no destructivo por prioridad, difusion de mensajes, excelente
+    deteccion de errores y confinamiento de fallos. Se usa en automocion,
+    maquinaria industrial, robots y sistemas medicos.
+\end{enumerate}
+
+La eleccion del protocolo adecuado depende del entorno: para sensores dentro de
+una placa, I2C o SPI; para redes de campo en una fabrica, RS-485 con Modbus o
+CAN; para sistemas criticos en tiempo real, CAN es la opcion mas robusta.

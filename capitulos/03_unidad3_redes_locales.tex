@@ -1,0 +1,492 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         CAPITULO 3
+%                  Redes de Area Local y Encaminamiento
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Redes de Area Local y Encaminamiento}
+
+Hasta ahora hemos estudiado como comunicar dos dispositivos mediante cables
+(UART, RS-232) y mediante ondas de radio (Bluetooth, Wi-Fi). Sin embargo, en
+un entorno industrial real no hay solo dos dispositivos: hay cientos de
+ordenadores, PLCs, sensores, servidores y camaras, todos conectados entre si
+y con la necesidad de compartir informacion.
+
+En este capitulo abordamos las \textbf{redes de computadores} desde una
+perspectiva arquitectonica: como se organizan fisicamente, como se identifican
+los dispositivos, como se toman las decisiones de donde enviar los paquetes de
+datos y que dispositivos permiten que una red se conecte con otra.
+
+
+\section{Redes de computadores: mas alla de dos dispositivos}
+
+Una \textbf{red de computadores} es un conjunto de dispositivos (hosts o sistemas
+terminales) interconectados mediante enlaces de comunicacion y dispositivos de
+conmutacion, que siguen unos protocolos comunes para intercambiar informacion.
+
+\begin{definicion}{Red de computadores}
+Una \textbf{red de computadores} es un conjunto de sistemas terminales (hosts)
+interconectados mediante enlaces de comunicacion y dispositivos de
+conmutacion (switches, routers), que intercambian datos siguiendo unos
+protocolos predefinidos.
+\end{definicion}
+
+Los componentes esenciales son:
+\begin{itemize}
+    \item \textbf{Hosts}: ordenadores, servidores, PLCs, smartphones... cualquier
+dispositivo que genera o consume datos.
+    \item \textbf{Enlaces de comunicacion}: cables (par trenzado, coaxial, fibra
+optica) o medios inalambricos (ondas de radio, Wi-Fi).
+    \item \textbf{Dispositivos de conmutacion}: switches y routers que reenvian los
+paquetes hacia su destino.
+\end{itemize}
+
+\subsection{Medios de transmision}
+
+Los enlaces de comunicacion pueden clasificarse en:
+
+\begin{itemize}
+    \item \textbf{Medios guiados}: la senal viaja confinada en un conductor fisico.
+    \begin{itemize}
+        \item \textbf{Par trenzado}: dos cables de cobre aislados y trenzados.
+        Barato, muy usado en Ethernet. Categorias: 5e, 6, 6a, 7...
+        \item \textbf{Cable coaxial}: dos conductores concentricos. Usado en redes
+cableadas antiguas y en television por cable.
+        \item \textbf{Fibra optica}: transmision de luz a traves de vidrio o plastico.
+        Alta velocidad, baja tasa de error, inmune al ruido electromagnetico.
+        Ideal para redes industriales y troncales de larga distancia.
+    \end{itemize}
+    \item \textbf{Medios no guiados}: la senal se propaga por el aire o el vacio.
+    \begin{itemize}
+        \item \textbf{Ondas de radio}: Wi-Fi, Bluetooth, 4G/5G. Sensible a
+interferencias, absorcion por objetos y efectos ambientales.
+    \end{itemize}
+\end{itemize}
+
+
+\section{El modelo TCP/IP}
+
+Para que todos los dispositivos de una red se entiendan, es necesario un
+modelo de capas que organice las funciones de comunicacion. El modelo
+\textbf{TCP/IP} es el estandar de Internet y consta de cuatro capas:
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Las cuatro capas del modelo TCP/IP}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Capa} & \textbf{Funcion} \\
+\midrule
+Aplicacion & Interfaz con el usuario. Protocolos: HTTP, FTP, DNS, SMTP... \\
+Transporte & Entrega fiable o rapida de datos. Protocolos: TCP (fiable), UDP (rapido). \\
+Internet (Red) & Direccionamiento y encaminamiento de paquetes. Protocolo: IP. \\
+Enlace de datos & Transmision fisica por el medio (cable, fibra, radio). Ethernet, Wi-Fi... \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{TCP frente a UDP}
+
+En la capa de transporte, los dos protocolos mas importantes son:
+
+\begin{definicion}{TCP y UDP}
+\textbf{TCP} (Transmission Control Protocol) es un protocolo \textbf{orientado a
+conexion} que garantiza la entrega fiable de datos, controlando errores,
+reordenando paquetes y solicitando retransmisiones si es necesario.
+
+\textbf{UDP} (User Datagram Protocol) es un protocolo \textbf{sin conexion} que
+envia datos sin garantizar su entrega ni orden. Es mas rapido que TCP y se
+usa en aplicaciones donde la velocidad es prioritaria (streaming, juegos en
+linea, DNS).
+\end{definicion}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Comparacion entre TCP y UDP}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+\textbf{Caracteristica} & \textbf{TCP} & \textbf{UDP} \\
+\midrule
+Conexion & Orientado a conexion & Sin conexion \\
+Fiabilidad & Garantiza entrega y orden & No garantiza nada \\
+Velocidad & Mas lento (overhead de control) & Mas rapido \\
+Control de errores & Si (checksum, ACK, retransmision) & No \\
+Uso tipico & Web, correo, transferencia de archivos & Streaming, juegos, DNS, VoIP \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{Direccionamiento IP}
+
+Cada dispositivo conectado a una red necesita un identificador unico: la
+\textbf{direccion IP} (Internet Protocol). En IPv4, es un numero de 32 bits
+representado en notacion decimal con puntos (por ejemplo, 192.168.1.10).
+
+\begin{definicion}{Direccion IP}
+Una \textbf{direccion IP} es un identificador numerico de 32 bits (IPv4) o 128 bits
+(IPv6) asignado a cada dispositivo conectado a una red. Permite localizar
+el dispositivo dentro de la red y enrutar los paquetes hacia el.
+\end{definicion}
+
+\subsection{Estructura de una direccion IPv4}
+
+Una direccion IPv4 se divide en dos partes:
+\begin{itemize}
+    \item \textbf{Parte de red}: identifica la red a la que pertenece el dispositivo.
+    \item \textbf{Parte de host}: identifica el dispositivo concreto dentro de esa red.
+\end{itemize}
+
+La separacion entre red y host viene dada por la \textbf{mascara de subred}
+(subnet mask), tambien de 32 bits. Los bits a 1 en la mascara indican la parte
+de red; los bits a 0, la parte de host.
+
+Por ejemplo, con la mascara 255.255.255.0 (/24), los primeros 24 bits (3
+octetos) son la red y el ultimo octeto es el host.
+
+\subsection{Clases de direcciones IP}
+
+Historicamente, las direcciones IP se dividieron en clases para facilitar su
+asignacion:
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Clases de direcciones IPv4}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Clase} & \textbf{Rango del primer octeto} & \textbf{Uso} \\
+\midrule
+A & 1 -- 126 & Redes muy grandes (16 millones de hosts) \\
+B & 128 -- 191 & Redes medianas (65.000 hosts) \\
+C & 192 -- 223 & Redes pequenas (254 hosts) \\
+D & 224 -- 239 & Multicast (grupos de receptores) \\
+E & 240 -- 255 & Reservado para investigacion \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Direcciones privadas} (no enrutables en Internet):
+\begin{itemize}
+    \item Clase A: 10.0.0.0 -- 10.255.255.255
+    \item Clase B: 172.16.0.0 -- 172.31.255.255
+    \item Clase C: 192.168.0.0 -- 192.168.255.255
+\end{itemize}
+
+\subsection{Gateway (puerta de enlace)}
+
+El \textbf{gateway} o puerta de enlace es la direccion IP del dispositivo que
+conecta una red local con el exterior (otra red o Internet). Cuando un host
+quiere enviar un paquete a una direccion que no pertenece a su propia red,
+lo envia al gateway, que se encarga de encaminarlo.
+
+\begin{definicion}{Gateway (puerta de enlace)}
+El \textbf{gateway} es la direccion IP del dispositivo de interconexion (router)
+que actua como salida de una red local. Todos los hosts de la red deben
+conocer la direccion del gateway para poder comunicarse con dispositivos
+externos.
+\end{definicion}
+
+
+\section{Dispositivos de interconexion: switch y router}
+
+\subsection{Switch (conmutador)}
+
+Un \textbf{switch} es un dispositivo que opera en la capa de enlace de datos
+(Capa 2 del modelo OSI). Su funcion es conectar multiples dispositivos dentro
+de una misma red local (LAN), reenviando los paquetes de datos solo al
+puerto al que esta conectado el destinatario.
+
+\begin{definicion}{Switch}
+Un \textbf{switch} es un dispositivo de interconexion de red que opera en la capa
+de enlace de datos. Conecta multiples dispositivos dentro de una misma red
+local y reenvia los paquetes unicamente al puerto del destinatario,
+mejorando la eficiencia respecto a un hub.
+\end{definicion}
+
+El switch aprende las direcciones MAC de los dispositivos conectados y
+construye una tabla de conmutacion. Cuando recibe un paquete, consulta esta
+tabla para saber por que puerto debe reenviarlo.
+
+\subsection{Router (encaminador)}
+
+Un \textbf{router} es un dispositivo que opera en la capa de red (Capa 3). Su
+funcion es interconectar diferentes redes, tomando decisiones sobre el camino
+que deben seguir los paquetes para llegar a su destino.
+
+\begin{definicion}{Router}
+Un \textbf{router} o encaminador es un dispositivo de interconexion de red que opera
+en la capa de red. Conecta diferentes redes (por ejemplo, dos LAN con
+diferentes rangos de IP) y encamina los paquetes entre ellas mediante tablas
+de rutas.
+\end{definicion}
+
+Un router tiene al menos dos interfaces de red (tarjetas de red), cada una
+conectada a una red diferente y con una direccion IP correspondiente a esa
+red. Cuando un paquete llega, el router consulta su \textbf{tabla de
+encaminamiento} para decidir por que interfaz debe reenviarlo.
+
+\subsection{Tabla de encaminamiento}
+
+La \textbf{tabla de encaminamiento} (o tabla de rutas) es la estructura de datos
+que utiliza un router para decidir como reenviar un paquete. Cada entrada
+contiene:
+
+\begin{itemize}
+    \item \textbf{Destino}: direccion de red de destino.
+    \item \textbf{Mascara}: mascara de subred del destino.
+    \item \textbf{Siguiente salto (next hop)}: direccion IP del siguiente router o
+    dispositivo al que hay que enviar el paquete.
+    \item \textbf{Coste}: metrica que indica la ``distancia'' o preferencia de la ruta.
+\end{itemize}
+
+\begin{definicion}{Tabla de encaminamiento}
+Una \textbf{tabla de encaminamiento} es la estructura de datos que utiliza un
+router para determinar la mejor ruta hacia un destino. Contiene entradas con
+el destino, la mascara, el siguiente salto (next hop) y el coste asociado.
+\end{definicion}
+
+
+\section{Encaminamiento: como los paquetes encuentran su camino}
+
+El \textbf{encaminamiento} (routing) es el proceso de seleccionar el camino optimo
+para enviar un paquete desde su origen hasta su destino a traves de una red
+interconectada.
+
+\subsection{Tipos de encaminamiento}
+
+\begin{itemize}
+    \item \textbf{Encaminamiento estatico}: las rutas se configuran manualmente en
+    los routers. Es sencillo pero no se adapta a cambios en la red.
+    \item \textbf{Encaminamiento dinamico}: los routers intercambian informacion
+    periodicamente y construyen sus tablas automaticamente. Se adapta a
+    fallos y cambios de topologia. Protocolos: RIP (vector distancia), OSPF
+    (estado de enlace).
+    \item \textbf{Encaminamiento por difusion (broadcasting)}: envia el paquete a
+    todos los nodos. Muy ineficiente pero robusto (flooding).
+    \item \textbf{Encaminamiento por camino mas corto}: se minimiza el numero de
+    saltos entre origen y destino (o algun otro coste, como retardo o ancho
+    de banda).
+\end{itemize}
+
+\subsection{Encaminamiento en la practica: de una LAN a otra}
+
+Cuando un ordenador de la red 192.168.10.0 quiere enviar un paquete a otro
+ordenador de la misma red, el switch lo entrega directamente (consultando su
+tabla MAC).
+
+Cuando quiere enviar un paquete a un ordenador de la red 192.168.20.0, el
+ordenador detecta que la direccion destino no pertenece a su red (comparando
+su propia IP y mascara con la IP destino). Entonces envia el paquete a su
+\textbf{gateway} (192.168.10.254), que es el router. El router recibe el paquete por
+su interfaz conectada a 192.168.10.0, consulta su tabla de rutas, ve que la
+red 192.168.20.0 es alcanzable a traves de su otra interfaz (192.168.20.254),
+y reenvia el paquete.
+
+Este proceso es la base de la comunicacion entre redes (\textbf{inter-networking}),
+que es precisamente lo que hace posible Internet.
+
+
+\section{Practica 4: Cisco Packet Tracer}
+\label{sec:practica4}
+
+\subsection{Objetivos}
+
+El objetivo de esta practica es entrar en contacto con el simulador de redes
+Cisco Packet Tracer y comprender los conceptos fundamentales de una red de
+area local:
+
+\begin{enumerate}
+    \item Configurar una red de area local (LAN) con al menos 3 ordenadores y un
+    switch, asignando direcciones IP, mascara de subred y gateway.
+    \item Verificar la comunicacion entre los ordenadores de la misma LAN
+    mediante herramientas como ping.
+    \item Crear una segunda LAN con un rango de direcciones diferente.
+    \item Interconectar ambas LAN mediante un router, configurando sus interfaces
+    de red para que actuen como gateway de cada LAN.
+    \item Verificar que los ordenadores de una red pueden comunicarse con los de
+    la otra a traves del router.
+\end{enumerate}
+
+\subsection{Material utilizado}
+
+\begin{itemize}
+    \item \textbf{Software}: Cisco Packet Tracer (simulador de redes Cisco).
+    \item \textbf{Hardware simulado}: PCs personales, switches (conmutadores) y
+    router (encaminador).
+    \item \textbf{Redes}:
+    \begin{itemize}
+        \item Red 1: 192.168.10.0 / 255.255.255.0
+        \item Red 2: 192.168.20.0 / 255.255.255.0
+    \end{itemize}
+\end{itemize}
+
+\subsection{Desarrollo de la practica}
+
+\subsubsection{Primera parte: configuracion de la LAN 192.168.10.0}
+
+Se diseno una red local con 3 ordenadores personales y un switch. Cada
+ordenador se configuro con los siguientes parametros:
+
+\begin{itemize}
+    \item \textbf{IP}: en el rango 192.168.10.0 (por ejemplo, 192.168.10.1,
+    192.168.10.2, 192.168.10.3).
+    \item \textbf{Mascara de subred}: 255.255.255.0 (/24).
+    \item \textbf{Gateway}: 192.168.10.254 (direccion que ocupara el router).
+\end{itemize}
+
+Se anadieron etiquetas a los ordenadores para identificar su nombre y su
+IP. A continuacion, se verifico la comunicacion entre los 3 ordenadores
+mediante el comando \texttt{ping}. El resultado confirmo que todos los
+ordenadores de la misma red local pueden comunicarse entre si a traves del
+switch.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla de Packet Tracer mostrando la LAN 192.168.10.0 con 3 PCs, el switch y las etiquetas.}\vspace{1.5cm}}}
+\caption{Topologia de la primera LAN (192.168.10.0)}
+\label{fig:lan1}
+\end{figure}
+
+\textbf{Comando de verificacion}:
+\begin{lstlisting}[language=bash,caption={Verificacion de conectividad en la LAN 1},label={lst:ping-lan1}]
+C:\> ping 192.168.10.2
+
+Respuesta desde 192.168.10.2: bytes=32 tiempo<1ms TTL=128
+Respuesta desde 192.168.10.2: bytes=32 tiempo<1ms TTL=128
+Respuesta desde 192.168.10.2: bytes=32 tiempo<1ms TTL=128
+\end{lstlisting}
+
+\subsubsection{Segunda parte: configuracion de la LAN 192.168.20.0 e interconexion}
+
+Se creo una segunda red local con 3 ordenadores mas y otro switch, esta vez
+en el rango 192.168.20.0. La configuracion de cada ordenador fue:
+
+\begin{itemize}
+    \item \textbf{IP}: en el rango 192.168.20.0 (por ejemplo, 192.168.20.1,
+    192.168.20.2, 192.168.20.3).
+    \item \textbf{Mascara de subred}: 255.255.255.0.
+    \item \textbf{Gateway}: 192.168.20.254.
+\end{itemize}
+
+Se verifico que los ordenadores de esta segunda LAN se comunicaban entre si.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla de Packet Tracer mostrando la LAN 192.168.20.0 con 3 PCs, el switch y las etiquetas.}\vspace{1.5cm}}}
+\caption{Topologia de la segunda LAN (192.168.20.0)}
+\label{fig:lan2}
+\end{figure}
+
+\subsubsection{Tercera parte: conexion de ambas LAN mediante un router}
+
+Para que los ordenadores de la red 192.168.10.0 puedan comunicarse con los de
+la red 192.168.20.0, se anadio un \textbf{router} entre ambas redes. El router
+cuenta con dos interfaces de red (tarjetas), una conectada a cada switch:
+
+\begin{itemize}
+    \item \textbf{Interfaz 1}: IP 192.168.10.254 / Mascara 255.255.255.0
+    (conectada al switch de la LAN 1).
+    \item \textbf{Interfaz 2}: IP 192.168.20.254 / Mascara 255.255.255.0
+    (conectada al switch de la LAN 2).
+\end{itemize}
+
+Estas dos direcciones son las \textbf{puertas de enlace} (gateway) de cada red.
+
+Se etiquetaron las conexiones del router indicando la red a la que se
+conecta cada interfaz y la IP configurada. Finalmente, se verifico la
+comunicacion entre ordenadores de ambas redes:
+
+\begin{lstlisting}[language=bash,caption={Verificacion de conectividad entre redes},label={lst:ping-interred}]
+C:\> ping 192.168.20.2
+
+Respuesta desde 192.168.20.2: bytes=32 tiempo=1ms TTL=127
+Respuesta desde 192.168.20.2: bytes=32 tiempo=1ms TTL=127
+Respuesta desde 192.168.20.2: bytes=32 tiempo=1ms TTL=127
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla de la topologia completa con ambas LAN, switches, router y las conexiones etiquetadas.}\vspace{1.5cm}}}
+\caption{Topologia completa: interconexion de dos LAN mediante un router}
+\label{fig:topologia-completa}
+\end{figure}
+
+\subsection{Analisis de la comunicacion entre redes}
+
+Cuando el PC 192.168.10.1 envia un \texttt{ping} al PC 192.168.20.2, ocurre lo
+siguiente:
+
+\begin{enumerate}
+    \item El PC 192.168.10.1 calcula la red destino aplicando su mascara a la
+    IP 192.168.20.2. Detecta que la red destino (192.168.20.0) no coincide
+    con su propia red (192.168.10.0).
+    \item Por tanto, no puede enviar el paquete directamente. Lo envia a su
+    \textbf{gateway}: 192.168.10.254.
+    \item El router recibe el paquete por su interfaz 192.168.10.254. Consulta
+    su tabla de encaminamiento y detecta que la red 192.168.20.0 es
+    \textbf{directamente conectada} a traves de su otra interfaz.
+    \item El router reenvia el paquete por la interfaz 192.168.20.254 hacia el
+    switch de la LAN 2.
+    \item El switch entrega el paquete al PC 192.168.20.2.
+    \item El PC 192.168.20.2 responde. Como la IP 192.168.10.1 pertenece a otra
+    red, el PC 192.168.20.2 envia la respuesta a su gateway (192.168.20.254).
+    \item El router reenvia la respuesta por la interfaz 192.168.10.254.
+\end{enumerate}
+
+Este proceso ilustra el concepto fundamental de \textbf{inter-networking}: la
+interconexion de redes distintas mediante un dispositivo de capa 3 (router).
+
+\subsection{Relacion teoria-practica}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Conexion entre conceptos teoricos y elementos de la Practica 4}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Concepto teorico} & \textbf{Observacion/aplicacion en la practica} \\
+\midrule
+Red de computadores & Se disenaron dos redes locales con 3 ordenadores cada una, switch y enlaces fisicos \\
+Switch (Capa 2) & Conecta los 3 ordenadores de cada LAN y reenvia paquetes al destinatario correcto \\
+Router (Capa 3) & Interconecta las dos LAN distintas, encaminando paquetes entre 192.168.10.0 y 192.168.20.0 \\
+Direccion IP & Cada ordenador tiene una IP unica dentro de su rango (192.168.10.x o 192.168.20.x) \\
+Mascara de subred & 255.255.255.0 indica que los primeros 3 octetos son red y el ultimo es host \\
+Gateway & 192.168.10.254 y 192.168.20.254 son las interfaces del router que actuan como puerta de enlace \\
+Comunicacion intra-red & Los PCs de la misma LAN se comunican directamente a traves del switch (ping funciona) \\
+Comunicacion inter-red & Los PCs de distintas redes necesitan el router; el ping inter-red confirma el encaminamiento \\
+Tabla de encaminamiento & El router internamente tiene una entrada indicando que ambas redes son directamente conectadas \\
+Modelo TCP/IP (Capa 3) & El ICMP (ping) opera sobre IP, demostrando la funcion de la capa de red \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{Resumen de la Unidad 3}
+
+\begin{itemize}
+    \item Una \textbf{red de computadores} esta compuesta por hosts, enlaces de
+    comunicacion (guiados o no guiados) y dispositivos de conmutacion.
+    \item El \textbf{modelo TCP/IP} organiza la comunicacion en cuatro capas:
+    aplicacion, transporte, internet y enlace. TCP garantiza fiabilidad; UDP
+    prioriza la velocidad.
+    \item El \textbf{direccionamiento IP} permite identificar cada dispositivo en una
+    red. Una direccion IPv4 de 32 bits se divide en parte de red y parte de host,
+    separadas por la \textbf{mascara de subred}.
+    \item Las \textbf{clases de direcciones IP} (A, B, C, D, E) facilitan la asignacion
+    de rangos a redes de diferentes tamanos. Las direcciones privadas permiten
+    redes locales sin consumir IPs publicas.
+    \item El \textbf{gateway} es la direccion del router que permite salir de una red
+    local hacia otra red o hacia Internet.
+    \item Un \textbf{switch} opera en la capa de enlace, conectando dispositivos
+    dentro de una misma LAN mediante reenvio basado en direcciones MAC.
+    \item Un \textbf{router} opera en la capa de red, interconectando diferentes
+    redes y tomando decisiones de encaminamiento mediante su \textbf{tabla de rutas}.
+    \item El \textbf{encaminamiento} puede ser estatico (configurado manualmente) o
+    dinamico (protocolos como RIP u OSPF). El proceso de enviar un paquete de
+    una red a otra es la base de Internet.
+    \item La \textbf{Practica 4} demuestra todos estos conceptos en un entorno
+    simulado: dos LAN conectadas mediante un router, configuracion de IPs,
+    mascaras, gateways y verificacion de conectividad con ping.
+\end{itemize}

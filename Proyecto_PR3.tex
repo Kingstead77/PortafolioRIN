@@ -1,0 +1,142 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       CARGA DE LA CLASE DE DOCUMENTO                        %
+%                                                                             %
+% Las opciones admisibles son:                                                %
+%      12pt / 11pt            (tamaño de letra; no usar 10pt)                 %
+%                                                                             %
+% spanish                     (lengua principal del trabajo)                  %
+%                                                                             %
+% listoffigures               (El documento incluye un Índice de figuras)     %
+% listoftables                (El documento incluye un Índice de tablas)      %
+% listoflistings              (El documento incluye un Índice de códigos)     %
+% listofquadres               (El documento incluye un Índice de cuadros)     %
+%                                                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt,spanish,listoffigures,listoftables,listoflistings]{plantilla_proyecto}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                     CODIFICACIÓN DEL ARCHIVO FUENTE                         %
+%                                                                             %
+%    Windows usa normalmente 'ansinew'                                        %
+%    En Linux es posible que sea 'latin1' o 'latin9'                          %
+%    Pero lo más recomendable es usar utf8 (Unicode 8)                        %
+%                                          (si su editor lo permite)          % 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[utf8]{inputenc} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Para conseguir que la tabla de contenido no salga en rojo
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\hypersetup{ colorlinks=true, linkcolor=black, urlcolor=cyan, }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                        OTROS PAQUETES Y DEFINICIONES                        %
+%                                                                             %
+% Cargue aquí los paquetes que necesite y declare los comandos y entornos     %
+%                                          (esta sección puede estar vacía)   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Evita que los entornos se partan, necesario en algunos capítulos
+\usepackage{needspace}
+% Soporte para inclusión de imágenes
+\usepackage{graphicx}
+% Permitir posicionamiento exacto de figuras
+\usepackage{float}
+% Mejoras para tablas con texto que debe ajustarse
+\usepackage{tabularx}
+\usepackage{ragged2e}
+% Permite partir palabras largas (ej. identificadores con guiones y subrayados)
+\usepackage{seqsplit}
+
+% Entorno visual para definiciones formales
+\usepackage{mdframed}
+\newmdenv[
+    linecolor=black,
+    backgroundcolor=gray!15,
+    innertopmargin=6pt,
+    innerbottommargin=6pt,
+    innerrightmargin=6pt,
+    innerleftmargin=6pt,
+    skipabove=8pt,
+    skipbelow=8pt
+]{definicionbox}
+\newenvironment{definicion}[1][]
+    {\begin{definicionbox}\itshape}
+    {\end{definicionbox}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                        DATOS DEL TRABAJO                                    %
+%                                                                             %
+% título, alumno, tutor y curso académico                                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% TODO: Ajustar título del nuevo trabajo
+
+\title{Libreta de Estudio \\ Redes Industriales}
+\author{Francisco Nortes Novikov \\ Mario Martínez Carneros}
+\tutor{Guillermo Lenin Lemus Zúñiga}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                           PALABRAS CLAVE                                    %
+%                                                                             %
+% Incluya aquí únicamente las palabras clave en español                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\keywords{TODO: palabra clave 1, palabra clave 2, palabra clave 3}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                              INICIO DEL DOCUMENTO                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                ÍNDICES                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\makeindexes
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                           RESUMEN DEL TRABAJO                               %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+% TODO: Completar el resumen del trabajo
+TODO: Escribir el resumen del nuevo trabajo académico.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                              CONTENIDO DEL TRABAJO                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\mainmatter
+
+% UNIDADES / TEMAS
+\input{capitulos/01_unidad1_comunicacion_serie}
+
+% UNIDADES FUTURAS (placeholder)
+\input{capitulos/02_unidad2_redes_inalambricas}
+\input{capitulos/03_unidad3_redes_locales}
+\input{capitulos/04_unidad4_servicios}
+\input{capitulos/05_unidad5_introduccion_redes_industriales}
+\input{capitulos/06_unidad6_encaminadores}
+\input{capitulos/07_unidad7_protocolos_can}
+
+\input{referencias/bibliografia}
+
+\APPENDIX
+\input{apendices/A_manual_instalacion}
+\input{apendices/B_manual_funcionamiento}
+\input{apendices/C_documentacion_adicional}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                              FIN DEL DOCUMENTO                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
