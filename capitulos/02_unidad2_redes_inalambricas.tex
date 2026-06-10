@@ -5,240 +5,461 @@
 
 \chapter{Redes Inalámbricas y Comunicaciones IoT}
 
-En los capítulos anteriores hemos estudiado cómo transmitir datos mediante cables:
-señales eléctricas que viajan por hilos de cobre siguiendo reglas estrictas como
-UART o RS-232. Sin embargo, en muchos entornos industriales y de automatización
-resulta inviable o poco práctico tender cables entre cada dispositivo. Imagina un
-almacén robotizado donde cientos de sensores de movimiento deben comunicarse con
-una central, o una fábrica de alimentos donde los cables dificultan la higiene.
+En los capítulos anteriores hemos estudiado cómo transmitir datos entre dos dispositivos mediante comunicaciones serie, analizando los aspectos físicos y de bajo nivel. Sin embargo, los sistemas reales rara vez se limitan a una única conexión punto a punto: en la industria, el hogar o la oficina, múltiples dispositivos necesitan intercambiar información a través de redes de computadores.
 
-En este capítulo abordamos las \textbf{comunicaciones inalámbricas}, que utilizan
-ondas de radio en lugar de conductores físicos para transmitir información. Nos
-centraremos en las dos tecnologías más utilizadas en sistemas embebidos:
-\textbf{Bluetooth Low Energy} (BLE) y \textbf{Wi-Fi}, y veremos cómo aplicarlas
-en la práctica para construir una red de sensores IoT (Internet de las Cosas).
+En este capítulo abordamos los fundamentos de las \textbf{redes de computadores} e \textbf{Internet}. Comenzamos identificando los componentes físicos y lógicos que forman una red, para luego adentrarnos en las técnicas de conmutación, los retardos asociados a la transmisión de paquetes y las arquitecturas de comunicación en capas. Finalmente, aplicaremos estos conceptos en la práctica mediante comunicaciones inalámbricas con BLE y Wi-Fi.
 
 
-\section{Comunicaciones inalámbricas: ¿por qué eliminar los cables?}
+\section{¿Qué es Internet?}
 
-La tendencia en la industria 4.0 es hacia la \textbf{desconexión física}: dispositivos
-que se comunican sin cables, que se autoconfiguran y que pueden desplazarse.
-Algunas ventajas de las comunicaciones inalámbricas son:
+\subsection{Componentes esenciales de una red de computadores}
+
+\subsubsection{Componentes físicos de una red}
+
+Una red de computadores está formada por:
 
 \begin{itemize}
-    \item \textbf{Flexibilidad de instalación}: no es necesario diseñar canalizaciones
-    ni prever la longitud exacta de los cables.
-    \item \textbf{Movilidad}: robots, carretillas elevadoras o sensores portátiles pueden
-    cambiar de ubicación sin restringirse por el cableado.
-    \item \textbf{Reducción de costes de mantenimiento}: los cables físicos se degradan
-    con el tiempo, especialmente en entornos con vibraciones, humedad o
-    temperaturas extremas.
-    \item \textbf{Escalabilidad}: es más sencillo añadir nuevos dispositivos a una red
-    inalámbrica existente que tender nuevos cables.
+    \item \textbf{Hosts o sistemas terminales}: son los equipos que se conectan a la red y ejecutan las aplicaciones (ordenadores, servidores, dispositivos móviles).
+    \item \textbf{Enlaces de comunicación}: son los canales que conectan los hosts entre sí. Utilizan un \textbf{medio de transmisión} que puede ser:
+    \begin{itemize}
+        \item \textbf{Medios guiados}:
+        \begin{itemize}
+            \item \textbf{Par trenzado}: dos cables de cobre aislados. Existen diferentes categorías (3, 5, 5e, 6, 6a, 7, 7A).
+            \item \textbf{Cable coaxial}: dos conductores concéntricos. Puede ser bidireccional, de banda base (canal único) o banda ancha (varios canales en el mismo cable).
+            \item \textbf{Fibra óptica}: de plástico o vidrio. Transmite luz. Alta velocidad, baja tasa de error, inmune al ruido electromagnético.
+        \end{itemize}
+        \item \textbf{Medios no guiados}:
+        \begin{itemize}
+            \item \textbf{Ondas de radio}: transmisión inalámbrica mediante antenas. Sus características dependen de la banda del espectro electromagnético. Es sensible a interferencias y absorción por objetos.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Dispositivos de conmutación}: reenvían los paquetes hacia sus destinos finales. Los más utilizados son:
+    \begin{itemize}
+        \item \textbf{Routers} (en el núcleo de la red)
+        \item \textbf{Switches} (en las redes de acceso)
+    \end{itemize}
+    \item \textbf{Subred}: basada en alguna tecnología de red que determina sus características. Puede usar medio compartido (difusión) o dispositivos de interconexión (conmutación).
 \end{itemize}
 
-Sin embargo, también existen inconvenientes:
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.1.png}
+\caption{Componentes físicos de una red de computadores}
+\label{fig:componentes-red}
+\end{figure}
+
+\subsubsection{Interconexión de redes}
+
+Cuando se conectan varias redes entre sí mediante un dispositivo de interconexión denominado \textbf{pasarela} o \textbf{router}, se forma una \textbf{inter-red}. \textbf{Internet} es la red de redes resultante de interconectar múltiples redes a nivel mundial.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.2.png}
+\caption{Interconexión de redes mediante routers}
+\label{fig:interconexion-redes}
+\end{figure}
+
+\subsection{Componentes lógicos de una red}
+
+Para que la red funcione a nivel lógico se necesita:
+
 \begin{itemize}
-    \item \textbf{Interferencias}: otras redes, microondas o motores eléctricos pueden
-    degradar la señal.
-    \item \textbf{Seguridad}: las ondas de radio pueden ser interceptadas si no se
-    cifran adecuadamente.
-    \item \textbf{Consumo energético}: transmitir por radio consume más energía que
-    enviar señales por un hilo.
-    \item \textbf{Alcance limitado}: la potencia de transmisión está regulada y, en
-    interiores, las paredes atenúan la señal.
+    \item \textbf{Protocolos}: conjunto de reglas que regulan la comunicación entre dos partes. Se basan en un modelo pregunta-respuesta.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.3.png}
+\caption{Ejemplo de protocolo de comunicación}
+\label{fig:protocolo-pregunta-respuesta}
+\end{figure}
+
+Los protocolos definen:
+\begin{itemize}
+    \item El formato (sintaxis), la semántica y el orden de los mensajes intercambiados entre entidades de red.
+    \item Las acciones a realizar en la transmisión y recepción de los mensajes.
+\end{itemize}
+
+\begin{itemize}
+    \item \textbf{Direccionamiento}: poder identificar a cada uno de los hosts que se comunican mediante \textbf{direcciones IP}:
+    \begin{itemize}
+        \item \textbf{IPv4}: 32 bits, expresados en notación decimal (ej. \texttt{158.52.4.123}).
+        \item \textbf{IPv6}: 128 bits, expresados en hexadecimal (ej. \texttt{2001:0db8:85a3::1319:8a2e:0370:7344}).
+        \item A las direcciones IP se les puede asociar un nombre (ej. \texttt{www.google.com}).
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.4.png}
+\caption{Direcciones IP y resolución de nombres}
+\label{fig:direcciones-ip}
+\end{figure}
+
+\subsection{Red de conmutación de paquetes}
+
+Si un host desea enviar un bloque de datos (paquete) a otro situado en otra subred, lo hace llegar al router adecuado, que lo recibe y lo retransmite a través de otra subred, y así sucesivamente hasta alcanzar el host destino.
+
+Características:
+\begin{itemize}
+    \item Cada ``salto'' cuesta un tiempo (transmitir el paquete y procesarlo).
+    \item El router debe almacenar el paquete (\textbf{Store and Forward}). Si no tiene memoria disponible, puede descartarlo.
+    \item La ruta se elige de forma distribuida: cada router toma decisiones en función de su entorno; el origen no sabe dónde está el paquete tras el primer salto.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.5.png}
+\caption{Conmutación de paquetes}
+\label{fig:conmutacion-paquetes}
+\end{figure}
+
+\subsection{Estructura comercial de Internet (ISPs)}
+
+\begin{itemize}
+    \item Los sistemas terminales se conectan a Internet a través de, al menos, un \textbf{Proveedor de Servicios de Internet (ISP)}.
+    \item Los ISP deben interconectarse entre sí para que cualquier par de hosts pueda comunicarse.
+    \item La estructura resultante es muy compleja (varios millones de proveedores) y tiene una estructura jerárquica:
+\end{itemize}
+
+\subsubsection{ISP de Nivel 1 (Tier 1)}
+
+\begin{itemize}
+    \item Redes troncales (backbone) con cobertura nacional e internacional.
+    \item Ejemplos: Level3, Sprint, AT\&T, NTT.
+    \item Se conectan entre sí como iguales (no pagan por tránsito).
+    \item Velocidad mínima de 622 Mbps, comúnmente 2.5 Gbps a 100 Gbps.
+    \item Se conectan a un gran número de ISP de nivel 2.
+    \item También existen \textbf{grandes distribuidores de contenidos} (Google, Akamai) que se conectan directamente.
+\end{itemize}
+
+\subsubsection{ISP de Nivel 2 (Tier 2)}
+
+\begin{itemize}
+    \item Más pequeños que los de nivel 1: cobertura regional o nacional.
+    \item Conectados al menos a un ISP de nivel 1 (proveedor), al que pagan por sus servicios.
+    \item También se conectan entre ellos mediante acuerdos de \textbf{peering} o en los \textbf{IXP} (Internet eXchange Points).
+\end{itemize}
+
+\subsubsection{ISP de Nivel 3 o locales}
+
+\begin{itemize}
+    \item Clientes de los ISP de nivel 1 o nivel 2.
+    \item Son las redes de acceso, las más próximas a los usuarios finales.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.6.png}
+\caption{Jerarquía de ISPs}
+\label{fig:jerarquia-isps}
+\end{figure}
+
+\subsubsection{Ejemplo: RedIRIS}
+
+\begin{itemize}
+    \item Red española para la interconexión de los recursos informáticos de universidades y centros de investigación.
+    \item Dispone de enlaces externos de hasta 100 Gbps.
+\end{itemize}
+
+\subsection{Resumen de Internet}
+
+Internet es una red de comunicación de datos:
+\begin{itemize}
+    \item Formada por múltiples redes interconectadas que emplean routers y conmutación de paquetes.
+    \item Todos los sistemas utilizan el mismo conjunto de protocolos de comunicación: \textbf{TCP/IP}.
+    \item Tienen un esquema de direccionamiento común: \textbf{direcciones IP}.
+    \item A nivel comercial se estructura en diferentes \textbf{ISP}.
 \end{itemize}
 
 
-\section{Bluetooth vs. Wi-Fi: dos filosofías, una misma banda}
+\section{La frontera de la red (El borde de la red)}
 
-Tanto Bluetooth como Wi-Fi operan en la banda de radio de \textbf{2.4 GHz} (aunque
-Wi-Fi también puede usar 5 GHz y 6 GHz en versiones modernas). A pesar de
-compartir el mismo espectro, están diseñados para propósitos muy diferentes.
+\subsection{Estructura de Internet}
 
-\begin{definicion}{Bluetooth y Wi-Fi}
-\textbf{Bluetooth} es un estándar de comunicación inalámbrica de corto alcance y
-bajo consumo, pensado para crear redes de área personal (PAN) entre dispositivos
-próximos.
+\begin{itemize}
+    \item \textbf{La frontera de la red}: hosts (clientes y servidores), redes de acceso y medios físicos (enlaces cableados/inalámbricos).
+    \item \textbf{El núcleo de la red}: routers interconectados formando una red de redes.
+\end{itemize}
 
-\textbf{Wi-Fi} es un estándar de comunicación inalámbrica de mayor alcance y
-velocidad, diseñado para crear redes de área local (LAN) que permiten a
-múltiples dispositivos acceder a internet o compartir recursos de forma simultánea.
-\end{definicion}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.7.png}
+\caption{Frontera y núcleo de la red}
+\label{fig:frontera-nucleo}
+\end{figure}
+
+\subsection{Aplicaciones distribuidas}
+
+\begin{itemize}
+    \item Las redes permiten aplicaciones distribuidas donde varios procesos colaboran para ofrecer un servicio.
+    \item Estas aplicaciones se ejecutan en los \textbf{sistemas terminales} u \textbf{hosts}, que pueden clasificarse en \textbf{clientes} y \textbf{servidores}.
+\end{itemize}
+
+\subsection{Tecnologías de acceso a Internet}
+
+Para conectar un ordenador al primer router que le permite acceder a Internet se necesita una tecnología de acceso y un medio físico compatible.
+
+Tecnologías más comunes:
+\begin{itemize}
+    \item \textbf{DSL} (Digital Subscriber Line)
+    \item \textbf{Cable HFC} (Hybrid Fiber Coaxial Cable)
+    \item \textbf{FTTH} (Fiber To The Home)
+    \item \textbf{Ethernet}
+    \item \textbf{Acceso inalámbrico}:
+    \begin{itemize}
+        \item \textbf{IEEE 802.11 (WiFi)}
+        \item \textbf{WiMax}
+        \item \textbf{Telefonía móvil}
+    \end{itemize}
+\end{itemize}
+
+La tecnología establece un límite a la máxima velocidad de transmisión disponible en la conexión (aunque no es el único factor).
+
+
+\section{El núcleo de la red. Técnicas de conmutación}
+
+El núcleo de la red es una malla de encaminadores interconectados. El objetivo de una red es transferir datos entre los sistemas conectados. Hay dos formas fundamentales de mover la información:
+
+\subsection{Conmutación de circuito}
+
+\begin{itemize}
+    \item Se reserva un conjunto de enlaces (circuito) por conversación.
+    \item \textbf{Tres fases}:
+    \begin{enumerate}
+        \item Establecimiento de conexión.
+        \item Transferencia de datos.
+        \item Cierre.
+    \end{enumerate}
+    \item \textbf{Recursos dedicados}: el circuito no se comparte. Una vez establecido, los recursos permanecen asociados al circuito se transfieran datos o no.
+    \item Por un enlace pueden pasar varios circuitos.
+    \item Se diseñó para redes telefónicas. No es óptimo para comunicación entre computadores porque estas generan tráfico en ráfagas (periodos de actividad/inactividad), a diferencia de una conversación telefónica que es más o menos continua.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{assets/cap2/2.8.png}
+\caption{Conmutación de circuito}
+\label{fig:conmutacion-circuito}
+\end{figure}
+
+\subsection{Conmutación de paquete}
+
+\subsubsection{Concepto de paquete}
+
+\begin{itemize}
+    \item Las aplicaciones generan mensajes de longitud arbitraria.
+    \item Por motivos de eficiencia, las redes limitan el tamaño máximo de los paquetes (ej. 1500 bytes = 12000 bits).
+    \item Los mensajes mayores deben fragmentarse en una secuencia de paquetes.
+\end{itemize}
+
+\subsubsection{Estructura de un paquete}
+
+\begin{itemize}
+    \item \textbf{Cabecera}: información de control (dirección remitente y destinatario).
+    \item \textbf{Datos}: contenido del mensaje.
+    \item \textbf{Paquete = cabecera + datos}.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{assets/cap2/2.9.png}
+\caption{Estructura de un paquete}
+\label{fig:estructura-paquete}
+\end{figure}
+
+\subsubsection{Funcionamiento}
+
+\begin{itemize}
+    \item No se reservan recursos en la red.
+    \item En los dispositivos de conmutación:
+    \begin{itemize}
+        \item \textbf{Almacenamiento y reenvío (Store and Forward)}: provoca retardo.
+        \item Se necesitan \textbf{colas} en los enlaces de salida, que pueden provocar retardo.
+        \item \textbf{Posible pérdida de paquetes}: las colas (buffers) de salida tienen capacidad finita; los paquetes que llegan a una cola llena se descartan.
+    \end{itemize}
+\end{itemize}
+
+
+\section{Retardos en redes de conmutación de paquete}
+
+\subsection{Retardos asociados a los enlaces}
+
+\subsubsection{Tiempo de transmisión ($t_{trans}$)}
+
+\begin{itemize}
+    \item Cada enlace tiene una capacidad medida en bits por segundo (bps).
+    \item Depende de la velocidad de transmisión del enlace ($v_{trans}$) y de la longitud del paquete en bits ($L$):
+    \begin{center}
+        $t_{trans} = L / v_{trans}$
+    \end{center}
+    \item Ejemplo: $L = 1500$ Bytes $= 12000$ bits
+    \begin{itemize}
+        \item $v_{trans} = 1$ Mbps $\rightarrow$ $t_{trans} = 12$ ms
+        \item $v_{trans} = 100$ Mbps $\rightarrow$ $t_{trans} = 0.12$ ms
+        \item $v_{trans} = 100$ MBps $\rightarrow$ $t_{trans} = 0.015$ ms
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Tiempo de propagación ($t_{prop}$)}
+
+\begin{itemize}
+    \item Depende de la distancia ($D$ metros) y la velocidad de propagación de las ondas en el medio ($v_{prop}$, de $2 \times 10^{8}$ m/s a $3 \times 10^{8}$ m/s):
+    \begin{center}
+        $t_{prop} = D / v_{prop}$
+    \end{center}
+    \item A mayor longitud del enlace, mayor tiempo de propagación para la misma velocidad de propagación.
+\end{itemize}
+
+\subsubsection{Ejemplo (Kurose R18)}
+
+Un paquete de $L = 1000$ bytes (8000 bits) se envía a través de un enlace de 2500 km:
+\begin{itemize}
+    \item $v_{prop} = 2.5 \times 10^{8}$ m/s
+    \item $v_{trans} = 2$ Mbps
+    \item $t_{trans} = 8000 / (2 \times 10^{6}) = 4 \times 10^{-3}$ s
+    \item $t_{prop} = (25 \times 10^{5}) / (2.5 \times 10^{8}) = 10^{-2}$ s
+    \item \textbf{Tiempo total} $= t_{trans} + t_{prop} = 14 \times 10^{-3}$ s
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.10.png}
+\caption{Cronograma del ejemplo Kurose}
+\label{fig:cronograma-kurose}
+\end{figure}
+
+\subsection{Retardos asociados a los dispositivos de conmutación}
+
+\subsubsection{Tiempo de procesamiento ($t_{proc}$)}
+
+\begin{itemize}
+    \item Tiempo necesario para tomar una decisión de encaminamiento del paquete.
+    \item Depende del dispositivo.
+\end{itemize}
+
+\subsubsection{Tiempo de espera en cola de salida ($t_{cola}$)}
+
+\begin{itemize}
+    \item Depende del tráfico y de las velocidades de transmisión de los enlaces.
+\end{itemize}
+
+\subsubsection{Resumen del viaje de un paquete}
+
+\begin{itemize}
+    \item \textbf{Hasta llegar al primer router}: $t_A = t_{trans} + t_{prop}$
+    \item \textbf{Por cada router que haya que atravesar}: $t_{router} = t_{proc} + t_{cola} + t_{trans} + t_{prop}$
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.11.png}
+\caption{Retardos acumulados en el viaje de un paquete}
+\label{fig:retardos-viaje}
+\end{figure}
+
+
+\section{Arquitecturas de comunicación}
+
+\subsection{Arquitectura en capas o niveles}
+
+La complejidad de las comunicaciones aconseja el empleo de modelos jerárquicos:
+\begin{itemize}
+    \item Se dividen las tareas en diferentes \textbf{capas o niveles}.
+    \item Cada nivel soluciona un objetivo particular y debe ser fácilmente reemplazable sin afectar al conjunto.
+    \item Para cada nivel se emplean uno o más protocolos específicos.
+    \item \textbf{Modularización}: facilita la implementación, el mantenimiento y la actualización.
+\end{itemize}
+
+Este modelo jerárquico se denomina \textbf{arquitectura de comunicación o de red}.
+
+\subsubsection{Comunicación entre niveles}
+
+\begin{itemize}
+    \item Cada nivel proporciona un servicio al nivel superior.
+    \item Solo hay comunicación entre niveles adyacentes.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{assets/cap2/2.12.png}
+\caption{Arquitectura de comunicación en capas}
+\label{fig:capas-comunicacion}
+\end{figure}
+
+\subsection{Modelo TCP/IP (5 niveles)}
+
+Es la arquitectura de Internet:
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Comparación entre Bluetooth y Wi-Fi}
-\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\caption{Modelo TCP/IP de 5 niveles}
+\begin{tabularx}{\textwidth}{@{}cX@{}}
 \toprule
-\textbf{Característica} & \textbf{Bluetooth (BLE)} & \textbf{Wi-Fi} \\
+\textbf{Nivel} & \textbf{Función} \\
 \midrule
-Alcance típico & 10--100 m (según clase) & 30--100 m (interior) \\
-Velocidad de datos & Hasta 2 Mb/s (BLE 5.0) & Hasta varios Gb/s (Wi-Fi 6) \\
-Consumo de energía & Muy bajo (meses con pila) & Alto (necesita alimentación) \\
-Topología típica & Punto a punto (1 maestro, 7 esclavos) & Estrella (AP + múltiples clientes) \\
-Uso principal & Periféricos, sensores, wearables & Acceso a internet, streaming, redes corporativas \\
-Complejidad de protocolo & Simple (GATT) & Compleja (TCP/IP, HTTP, etc.) \\
-Interferencias en 2.4 GHz & Alta (comparte banda con Wi-Fi) & Alta (comparte banda con Bluetooth) \\
+5. Aplicación & Protocolos para aplicaciones de red (HTTP, SMTP, IMAP, etc.) \\
+4. Transporte & Transmisión de información entre dos procesos a través de la red. Protocolos: TCP y UDP \\
+3. Red & Encamina paquetes desde el host origen al host destino, eligiendo la ruta a través de la red \\
+2. Enlace & Traslada tramas de un nodo (host o router) al siguiente nodo de la ruta \\
+1. Físico & Transmisión de bits sobre un enlace de comunicación. Define el medio de transmisión y la codificación de la señal \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\textbf{¿Cuándo usar cada uno?}
-\begin{itemize}
-    \item Usa \textbf{Bluetooth} cuando necesites conectar un sensor o un periférico
-    a un dispositivo central, con bajo consumo y sin necesidad de acceso a internet.
-    Ejemplos: auriculares inalámbricos, pulsómetros, sensores de temperatura portátiles.
-    \item Usa \textbf{Wi-Fi} cuando el dispositivo necesite enviar datos a un servidor
-    en la nube, recibir comandos remotos o formar parte de una red corporativa.
-    Ejemplos: cámaras de videovigilancia, termostatos inteligentes, paneles de control.
-\end{itemize}
+Se pueden utilizar diferentes protocolos de nivel físico y de nivel de enlace a lo largo de la ruta.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{assets/cap2/2.13.png}
+\caption{Pila de protocolos TCP/IP}
+\label{fig:pila-tcpip}
+\end{figure}
 
-\section{Bluetooth Low Energy (BLE)}
+\subsection{Modelo OSI (7 niveles)}
 
-\subsection{¿Qué es BLE?}
+El modelo OSI (Open Systems Interconnection) de ISO añade dos niveles adicionales respecto a TCP/IP:
 
-Bluetooth Low Energy (BLE), también conocido como Bluetooth Smart, es una versión
-del estándar Bluetooth optimizada para un consumo de energía mínimo. No es
-compatible a nivel de protocolo con el Bluetooth clásico (el de los auriculares), pero
-comparte la misma banda de radio.
+\begin{table}[htbp]
+\centering
+\small
+\caption{Modelo OSI de 7 niveles}
+\begin{tabularx}{\textwidth}{@{}cX@{}}
+\toprule
+\textbf{Nivel} & \textbf{Función} \\
+\midrule
+7. Aplicación & \\
+6. Presentación & Representación e interpretación del significado de los datos (encriptación, compresión, etc.) \\
+5. Sesión & Sincronización y recuperación del flujo de datos \\
+4. Transporte & \\
+3. Red & \\
+2. Enlace & \\
+1. Físico & \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-\begin{definicion}{Bluetooth Low Energy (BLE)}
-BLE es un protocolo de comunicación inalámbrica de corto alcance que permite la
-transmisión de pequeños paquetes de datos con un consumo de energía extremadamente
-bajo. Es ideal para dispositivos alimentados por baterías que deben operar durante
-meses o años sin recargarse.
-\end{definicion}
+La arquitectura TCP/IP no dispone de las capas de sesión y presentación. Si se requieren estos servicios, deben incorporarse a la aplicación.
 
-En BLE, los dispositivos desempeñan dos roles principales:
-\begin{itemize}
-    \item \textbf{Periférico (Peripheral)}: dispositivo que ofrece datos. Suele ser el sensor
-    o el actuador.
-    \item \textbf{Central (Central)}: dispositivo que solicita y recibe datos. Suele ser un
-    teléfono, un PC o un gateway IoT.
-\end{itemize}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{assets/cap2/2.14.png}
+\caption{Modelo OSI vs.\ TCP/IP}
+\label{fig:modelo-osi}
+\end{figure}
 
-\subsection{Arquitectura GATT: servicios y características}
+\subsection{Encapsulamiento en TCP/IP}
 
-BLE organiza la información mediante una estructura jerárquica conocida como
-\textbf{GATT} (Generic Attribute Profile):
+Cada nivel añade su propia cabecera a los datos que recibe del nivel superior:
 
-\begin{enumerate}
-    \item \textbf{Perfil (Profile)}: conjunto de servicios predefinidos para un uso específico
-    (por ejemplo, un perfil de pulsómetro).
-    \item \textbf{Servicio (Service)}: agrupación lógica de características. Por ejemplo, un
-    ``servicio de temperatura''.
-    \item \textbf{Característica (Characteristic)}: el dato concreto. Puede ser una
-    temperatura, una cadena de texto o un valor de configuración.
-    \item \textbf{Descriptor (Descriptor)}: metadatos adicionales sobre una característica,
-    como su formato o unidades.
-\end{enumerate}
-
-Cada servicio y característica se identifica mediante un \textbf{UUID} (Universally Unique
-Identifier), un código de 128 bits que garantiza que no haya colisiones entre
-aplicaciones diferentes.
-
-\begin{definicion}{UUID en BLE}
-Un \textbf{UUID} (Universally Unique Identifier) es un identificador numérico de 128 bits
-que se utiliza para distinguir de forma única servicios, características y descriptores
-dentro de una aplicación BLE. Los UUIDs pueden ser estandarizados (16 o 32 bits) o
-customizados por el desarrollador (128 bits).
-\end{definicion}
-
-\subsection{Advertising y escaneo}
-
-Un periférico BLE no puede ser conectado directamente. Primero debe anunciar su
-presencia mediante un proceso llamado \textbf{advertising} (difusión): envía paquetes
-periódicos de anuncio que contienen su nombre, el UUID de sus servicios y otros
-datos.
-
-Una central que desea conectarse realiza un \textbf{escaneo} (scanning): escucha los
-paquetes de anuncio hasta encontrar un dispositivo con el UUID que busca. Una vez
-encontrado, se establece la conexión.
-
-\subsection{Notificaciones y lecturas}
-
-Las características BLE pueden tener diferentes propiedades:
-\begin{itemize}
-    \item \textbf{READ}: la central puede leer el valor explícitamente.
-    \item \textbf{WRITE}: la central puede escribir un valor.
-    \item \textbf{NOTIFY}: el periférico envía el valor automáticamente cada vez que cambia,
-    sin que la central tenga que pedirlo.
-\end{itemize}
-
-Las notificaciones son especialmente útiles en IoT: el sensor envía una nueva lectura
-de temperatura cada vez que está disponible, sin que el receptor tenga que estar
-constantemente preguntando.
-
-
-\section{Wi-Fi en sistemas embebidos}
-
-\subsection{Modos de operación}
-
-Un dispositivo Wi-Fi puede funcionar en dos modos principales:
-
-\begin{itemize}
-    \item \textbf{STA (Station)}: el dispositivo se conecta a un punto de acceso (AP)
-    existente, como un router. Es el modo más común para sensores IoT.
-    \item \textbf{AP (Access Point)}: el dispositivo crea su propia red Wi-Fi a la que
-    otros dispositivos pueden conectarse. Útil para configuración inicial.
-\end{itemize}
-
-\subsection{Protocolo HTTP para IoT}
-
-En la práctica, cuando un dispositivo embebido con Wi-Fi necesita comunicarse, lo
-hace a través del protocolo \textbf{HTTP} (HyperText Transfer Protocol), el mismo que
-utiliza un navegador web para cargar páginas.
-
-\begin{definicion}{HTTP en IoT}
-HTTP es el protocolo de comunicación que permite a un cliente (por ejemplo, una
-ESP32 o un navegador) solicitar recursos a un servidor. En el contexto IoT, un sensor
-puede actuar como \textbf{servidor HTTP}, respondiendo a peticiones con datos en formato
-texto, JSON o XML.
-\end{definicion}
-
-El flujo típico es:
-\begin{enumerate}
-    \item El dispositivo sensor se conecta a la red Wi-Fi (modo STA).
-    \item Se le asigna una dirección IP por DHCP.
-    \item Inicia un servidor HTTP en un puerto (normalmente el 80).
-    \item Define rutas, como \texttt{/temperatura}, que devuelven el valor del sensor.
-    \item Un cliente (otra ESP32, un PC o un smartphone) realiza una petición
-    \texttt{GET} a esa IP y ruta, y recibe el dato.
-\end{enumerate}
-
-\subsection{Redes corporativas y seguridad}
-
-En entornos universitarios o industriales, las redes Wi-Fi suelen estar protegidas
-mediante autenticación (WPA2-PSK, WPA2-Enterprise) o listas de control de acceso
-(MAC filtering). Esto puede complicar la conexión de dispositivos IoT, ya que no todos
-los sistemas embebidos soportan los métodos de autenticación más avanzados.
-
-En la práctica, una solución común cuando la red corporativa es problemática es
-utilizar un \textbf{hotspot móvil} (punto de acceso creado por un teléfono), que permite
-controlar directamente qué dispositivos se conectan.
-
-
-\section{Sensor de temperatura y humedad DHT11}
-
-El \textbf{DHT11} es un sensor digital de bajo coste que mide temperatura y humedad
-relativa del aire. Es muy popular en proyectos educativos y de prototipado porque
-su conexión es simple (solo necesita un pin de datos y alimentación) y proporciona
-valores directamente en formato digital, sin necesidad de conversión analógica.
-
-\begin{definicion}{DHT11}
-El DHT11 es un sensor digital compuesto que incluye un elemento resistivo para medir
-humedad y un termistor para medir temperatura. Su resolución es de 1 grado Celsius y
-1 \% de humedad relativa, con un rango de 0 a 50 grados Celsius. El tiempo mínimo
-entre lecturas es de aproximadamente 1 segundo.
-\end{definicion}
-
-Aunque el DHT11 no es el sensor más preciso del mercado (el DHT22 o el SHT30 son
-más exactos), su simplicidad y precio lo hacen ideal para aprender los fundamentos
-de la adquisición de datos y la transmisión de sensores.
-
+\begin{verbatim}
+Aplicación:  Mensaje (M)
+Transporte:  Segmento TCP / Datagrama UDP (cabecera T + M)
+Red (IP):    Datagrama o Paquete IP (cabecera R + T + M)
+Enlace:      Trama (cabecera E + R + T + M)
+Físico:      Bits (110110101101...)
+\end{verbatim}
 
 \section{Práctica 3: Comunicaciones Inalámbricas}
 \label{sec:practica3}
@@ -276,39 +497,11 @@ pin 2 de la ESP32 y mostrarla por el puerto serie.
 
 El código es sencillo: se inicializa el sensor, se realiza una lectura cada 2 segundos
 y se comprueba que el valor sea válido (el DHT11 puede devolver errores ocasionales
-si no se respeta el tiempo de muestreo).
-
-\begin{lstlisting}[caption={Lectura del sensor DHT11},label={lst:dht11-lectura}]
-#include <DHT.h>
-
-#define DHTPIN 2
-#define DHTTYPE DHT11
-
-DHT dht(DHTPIN, DHTTYPE);
-
-void setup() {
-  Serial.begin(115200);
-  dht.begin();
-  Serial.println("Sensor DHT11 inicializado.");
-}
-
-void loop() {
-  float temperatura = dht.readTemperature();
-
-  if (isnan(temperatura)) {
-    Serial.println("Error leyendo el DHT11");
-  } else {
-    Serial.print("Temperatura: ");
-    Serial.print(temperatura);
-    Serial.println(" C");
-  }
-  delay(2000);
-}
-\end{lstlisting}
+si no se respeta el tiempo de muestreo). El listado de código completo se encuentra en el apéndice correspondiente.
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir fotografia del montaje fisico con la ESP32-S3 y el sensor DHT11 conectado.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap2/2.15.png}
 \caption{Montaje fisico del sensor DHT11 con la ESP32-S3}
 \label{fig:montaje-dht11}
 \end{figure}
@@ -328,103 +521,17 @@ Ambas caracteristicas tienen notificaciones activadas, lo que significa que cual
 cliente conectado recibira los datos automaticamente sin tener que solicitarlos.
 
 El servidor tambien gestiona la reconexion: si el cliente se desconecta, la ESP32
-vuelve a anunciarse (advertising) para aceptar nuevas conexiones.
-
-\begin{lstlisting}[caption={Servidor BLE de temperatura (extracto)},label={lst:ble-server}]
-// UUIDs del servicio y caracteristicas
-#define SERVICE_UUID        "8628b276-4bba-420a-ab99-dd69945408bf"
-#define CHARACTERISTIC_UUID_1 "6cb1114c-4410-4757-85af-b064b3cc689a"
-#define CHARACTERISTIC_UUID_2 "a1642e22-4f4e-41de-b173-b5bdb099f12c"
-
-// Inicializar BLE
-BLEDevice::init("ESP32_Temperatura");
-pServer = BLEDevice::createServer();
-pServer->setCallbacks(new MyServerCallbacks());
-
-BLEService *pService = pServer->createService(SERVICE_UUID);
-
-// Caracteristica numerica con notificaciones
-pCharacteristic_1 = pService->createCharacteristic(
-  CHARACTERISTIC_UUID_1,
-  BLECharacteristic::PROPERTY_NOTIFY
-);
-pBLE2902_1 = new BLE2902();
-pBLE2902_1->setNotifications(true);
-pCharacteristic_1->addDescriptor(pBLE2902_1);
-
-pService->start();
-BLEDevice::startAdvertising();
-\end{lstlisting}
+vuelve a anunciarse (advertising) para aceptar nuevas conexiones. El código completo del servidor BLE se incluye en el apéndice.
 
 En el bucle principal, si hay un cliente conectado, el servidor lee el DHT11 y
-envia el valor por ambas caracteristicas:
-
-\begin{lstlisting}[caption={Envio de temperatura por BLE},label={lst:ble-envio}]
-if (deviceConnected) {
-  float temperatura = dht.readTemperature();
-  if (isnan(temperatura)) {
-    Serial.println("Error leyendo el DHT11");
-    delay(2000);
-    return;
-  }
-
-  // Enviar como valor numerico
-  pCharacteristic_1->setValue(temperatura);
-  pCharacteristic_1->notify();
-
-  // Enviar como texto descriptivo
-  String mensaje = "Temperatura actual: " + String(temperatura) + " C";
-  pCharacteristic_2->setValue(mensaje.c_str());
-  pCharacteristic_2->notify();
-
-  delay(2000);
-}
-\end{lstlisting}
+envia el valor por ambas caracteristicas (ver apéndice con el código completo).
 
 \subsubsection{Tercera parte: cliente BLE}
 
 La segunda ESP32-S3 actua como \textbf{cliente BLE}. Su mision es escanear el entorno
 buscando un dispositivo que anuncie el \texttt{SERVICE\_UUID} del servidor, conectarse
 a el, suscribirse a las notificaciones de una de las caracteristicas y mostrar el
-dato recibido por el puerto serie.
-
-\begin{lstlisting}[caption={Cliente BLE de temperatura (extracto)},label={lst:ble-client}]
-// UUIDs (iguales que en el servidor)
-#define SERVICE_UUID        "8628b276-4bba-420a-ab99-dd69945408bf"
-#define CHARACTERISTIC_UUID "a1642e22-4f4e-41de-b173-b5bdb099f12c"
-
-// Callback cuando se detecta el servidor
-class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
-  void onResult(BLEAdvertisedDevice advertisedDevice) {
-    if (advertisedDevice.haveServiceUUID() &&
-        advertisedDevice.isAdvertisingService(BLEUUID(SERVICE_UUID))) {
-      Serial.println("Servidor encontrado");
-      pServerAddress = new BLEAddress(advertisedDevice.getAddress());
-      doConnect = true;
-      advertisedDevice.getScan()->stop();
-    }
-  }
-};
-
-// Callback cuando llegan notificaciones
-static void notifyCallback(
-  BLERemoteCharacteristic* pBLERemoteCharacteristic,
-  uint8_t* pData, size_t length, bool isNotify) {
-  String mensaje = "";
-  for (int i = 0; i < length; i++) {
-    mensaje += (char)pData[i];
-  }
-  Serial.print("Mensaje recibido: ");
-  Serial.println(mensaje);
-}
-\end{lstlisting}
-
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla del monitor serie del cliente BLE mostrando la temperatura recibida.}\vspace{1.5cm}}}
-\caption{Monitor serie del cliente BLE recibiendo temperatura}
-\label{fig:ble-cliente-serie}
-\end{figure}
+dato recibido por el puerto serie. El código del cliente BLE se encuentra en el apéndice.
 
 \subsubsection{Cuarta parte: servidor y cliente Wi-Fi}
 
@@ -434,99 +541,12 @@ abierta. En este caso, la ESP32-S3 que lleva el DHT11 se conecta a la red
 
 Cada vez que un cliente visita la URL \texttt{http://IP\_DEL\_ESP32/temperatura},
 el servidor lee el sensor y responde con el valor de temperatura como texto plano.
-
-\begin{lstlisting}[caption={Servidor Wi-Fi de temperatura},label={lst:wifi-server}]
-#include <WiFi.h>
-#include <WebServer.h>
-#include <DHT.h>
-
-#define DHTPIN 2
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
-
-const char* ssid = "UPV-PSK";
-const char* password = "C0n3ct4nd0s3_m0l4!";
-WebServer server(80);
-
-void handleTemperatura() {
-  float temperatura = dht.readTemperature();
-  if (isnan(temperatura)) {
-    server.send(500, "text/plain", "Error leyendo sensor");
-    return;
-  }
-  server.send(200, "text/plain", String(temperatura));
-}
-
-void setup() {
-  Serial.begin(115200);
-  dht.begin();
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nConectado!");
-  Serial.print("IP del servidor: ");
-  Serial.println(WiFi.localIP());
-
-  server.on("/temperatura", handleTemperatura);
-  server.begin();
-}
-
-void loop() {
-  server.handleClient();
-}
-\end{lstlisting}
+El código completo del servidor Wi-Fi se incluye en el apéndice.
 
 Por otro lado, la segunda ESP32 (o cualquier ordenador) actua como \textbf{cliente
 HTTP}. Se conecta a la misma red Wi-Fi, construye la URL a partir de la IP del
 servidor, realiza una peticion \texttt{GET} cada 2 segundos y muestra la respuesta.
-
-\begin{lstlisting}[caption={Cliente Wi-Fi de temperatura},label={lst:wifi-client}]
-#include <WiFi.h>
-#include <HTTPClient.h>
-
-const char* ssid = "UPV-PSK";
-const char* password = "C0n3ct4nd0s3_m0l4!";
-const char* serverIP = "192.168.1.42";
-
-void setup() {
-  Serial.begin(115200);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nConectado a la red WiFi");
-}
-
-void loop() {
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    String url = String("http://") + serverIP + "/temperatura";
-    http.begin(url);
-    int httpResponseCode = http.GET();
-
-    if (httpResponseCode > 0) {
-      String temperatura = http.getString();
-      Serial.print("Temperatura recibida: ");
-      Serial.println(temperatura + " C");
-    } else {
-      Serial.print("Error en la conexion: ");
-      Serial.println(httpResponseCode);
-    }
-    http.end();
-  }
-  delay(2000);
-}
-\end{lstlisting}
-
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla del monitor serie del cliente Wi-Fi mostrando la temperatura recibida.}\vspace{1.5cm}}}
-\caption{Monitor serie del cliente Wi-Fi recibiendo temperatura via HTTP}
-\label{fig:wifi-cliente-serie}
-\end{figure}
+El código del cliente HTTP se encuentra en el apéndice.
 
 \subsection{Problemas encontrados}
 
@@ -571,23 +591,12 @@ Consumo energetico & BLE consume menos que Wi-Fi, aunque en esta practica ambas 
 \section{Resumen de la Unidad 2}
 
 \begin{itemize}
-    \item Las \textbf{comunicaciones inalambricas} eliminan la necesidad de cableado
-    fisico, ofreciendo flexibilidad y movilidad, aunque introducen desafios como
-    interferencias, seguridad y consumo energetico.
-    \item \textbf{Bluetooth} y \textbf{Wi-Fi} comparten la banda de 2.4 GHz pero estan
-    disenados para propositos distintos: BLE es ideal para sensores de bajo consumo
-    a corta distancia, mientras que Wi-Fi proporciona mayor alcance y velocidad para
-    acceso a redes y a internet.
-    \item \textbf{BLE} organiza los datos mediante el perfil GATT, utilizando servicios
-    y caracteristicas identificados por UUIDs. Las notificaciones permiten enviar
-    datos de forma automatica sin polling.
-    \item \textbf{Wi-Fi} en sistemas embebidos permite crear servidores HTTP que
-    exponen datos de sensores a traves de peticiones web estandar, facilitando la
-    integracion con aplicaciones y plataformas en la nube.
-    \item La \textbf{Practica 3} demuestra la viabilidad de ambas tecnologias para
-    transmitir datos de temperatura en tiempo real, comparando el enfoque punto a
-    punto de BLE con el enfoque cliente-servidor web de Wi-Fi.
-    \item Las \textbf{redes corporativas IoT} pueden presentar barreras de acceso
-    (control de dispositivos, timeouts) que requieren soluciones alternativas como
-    hotspots moviles para el desarrollo de prototipos.
+    \item \textbf{Internet} es una red de redes que interconecta millones de dispositivos a nivel mundial mediante protocolos comunes (TCP/IP) y direcciones IP.
+    \item Una red de computadores se compone de \textbf{hosts}, \textbf{enlaces de comunicación} (guiados y no guiados) y \textbf{dispositivos de conmutación} (routers y switches).
+    \item La red se divide en \textbf{frontera} (hosts y redes de acceso) y \textbf{núcleo} (routers interconectados que encaminan paquetes).
+    \item Las dos técnicas fundamentales de conmutación son la \textbf{conmutación de circuito} (recursos dedicados, usada en telefonía) y la \textbf{conmutación de paquetes} (recursos compartidos, usada en Internet). Esta última emplea el principio \textbf{store and forward} con colas de salida.
+    \item Los retardos en redes de conmutación de paquetes incluyen el \textbf{tiempo de transmisión} (dependiente del tamaño del paquete y la velocidad del enlace), el \textbf{tiempo de propagación} (dependiente de la distancia), el \textbf{tiempo de procesamiento} y el \textbf{tiempo de espera en cola}.
+    \item La \textbf{arquitectura TCP/IP} organiza las comunicaciones en 5 niveles (físico, enlace, red, transporte y aplicación), mientras que el \textbf{modelo OSI} añade las capas de presentación y sesión. El \textbf{encapsulamiento} consiste en añadir cabeceras de cada nivel a los datos del nivel superior.
+    \item En la \textbf{Práctica 3} se aplicaron estos conceptos mediante la implementación de comunicaciones inalámbricas con BLE y Wi-Fi para transmitir datos de sensores en tiempo real.
+    \item Las \textbf{redes corporativas IoT} pueden presentar barreras de acceso (control de dispositivos, timeouts) que requieren soluciones alternativas como hotspots móviles para el desarrollo de prototipos.
 \end{itemize}
