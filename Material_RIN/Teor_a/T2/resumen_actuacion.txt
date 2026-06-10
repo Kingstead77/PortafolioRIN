@@ -1,0 +1,13 @@
+Resumen de la actuación en el workspace:
+
+1. Se analizó el documento PDF "T2_Redesv2.pdf" del Tema 2 (Introducción a las redes de computadores e Internet) extrayendo todo su contenido mediante pdftotext.
+
+2. Se creó el archivo "resumen_T2_Redes.md" con la estructura completa del documento:
+   - Se extrajeron TODOS los temas tratados: ¿Qué es Internet?, Componentes físicos y lógicos, Conmutación de paquetes, Estructura de ISPs, Frontera de la red, Tecnologías de acceso, Núcleo de la red, Conmutación de circuito vs paquete, Retardos (transmisión, propagación, procesamiento, cola), y Arquitecturas de comunicación (TCP/IP, OSI, encapsulamiento).
+   - Cada tema incluye la explicación correspondiente extraída del PDF.
+
+3. Se modificó el markdown para añadir 20 referencias a imágenes ([insertar imagen sobre ...]) en los puntos clave donde un diagrama o ilustración facilitaría la comprensión.
+
+4. Se creó "resumen_T2_Redes.txt" con el mismo contenido en texto plano (sin formato markdown).
+
+5. Se creó este archivo "resumen_actuacion.txt" con la explicación de las acciones realizadas en el workspace.

@@ -1,0 +1,1 @@
+Se está analizando el PDF `T2_Redesv2.pdf` del tema "Introducción a las redes de computadores e Internet" para extraer todos sus temas y explicaciones en un markdown estructurado, y luego se han añadido referencias a imágenes (`[insertar imagen sobre ...]`) en los puntos clave del documento para facilitar su ilustración posterior.

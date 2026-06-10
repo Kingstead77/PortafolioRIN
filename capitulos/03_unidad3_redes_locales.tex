@@ -17,275 +17,362 @@ los dispositivos, como se toman las decisiones de donde enviar los paquetes de
 datos y que dispositivos permiten que una red se conecte con otra.
 
 
-\section{Redes de computadores: mas alla de dos dispositivos}
+\section{TCP/IP}
 
-Una \textbf{red de computadores} es un conjunto de dispositivos (hosts o sistemas
-terminales) interconectados mediante enlaces de comunicacion y dispositivos de
-conmutacion, que siguen unos protocolos comunes para intercambiar informacion.
+El modelo \textbf{TCP/IP} es la arquitectura de comunicaciones de Internet. En su version simplificada, consta de cuatro capas:
 
-\begin{definicion}{Red de computadores}
-Una \textbf{red de computadores} es un conjunto de sistemas terminales (hosts)
-interconectados mediante enlaces de comunicacion y dispositivos de
-conmutacion (switches, routers), que intercambian datos siguiendo unos
-protocolos predefinidos.
+\begin{definicion}
+\textbf{IP (Internet Protocol)} es el protocolo que obtiene y define la direccion IP del destino. Actua como un numero de telefono asignado a cada dispositivo en la red.
+
+\textbf{TCP (Transmission Control Protocol)} transporta y enruta los datos a traves de la red, garantizando la entrega al destino que IP ha definido. Es la tecnologia que permite establecer la comunicacion entre dos puntos.
 \end{definicion}
 
-Los componentes esenciales son:
-\begin{itemize}
-    \item \textbf{Hosts}: ordenadores, servidores, PLCs, smartphones... cualquier
-dispositivo que genera o consume datos.
-    \item \textbf{Enlaces de comunicacion}: cables (par trenzado, coaxial, fibra
-optica) o medios inalambricos (ondas de radio, Wi-Fi).
-    \item \textbf{Dispositivos de conmutacion}: switches y routers que reenvian los
-paquetes hacia su destino.
-\end{itemize}
-
-\subsection{Medios de transmision}
-
-Los enlaces de comunicacion pueden clasificarse en:
+\subsection{Capas del modelo TCP/IP}
 
 \begin{itemize}
-    \item \textbf{Medios guiados}: la senal viaja confinada en un conductor fisico.
-    \begin{itemize}
-        \item \textbf{Par trenzado}: dos cables de cobre aislados y trenzados.
-        Barato, muy usado en Ethernet. Categorias: 5e, 6, 6a, 7...
-        \item \textbf{Cable coaxial}: dos conductores concentricos. Usado en redes
-cableadas antiguas y en television por cable.
-        \item \textbf{Fibra optica}: transmision de luz a traves de vidrio o plastico.
-        Alta velocidad, baja tasa de error, inmune al ruido electromagnetico.
-        Ideal para redes industriales y troncales de larga distancia.
-    \end{itemize}
-    \item \textbf{Medios no guiados}: la senal se propaga por el aire o el vacio.
-    \begin{itemize}
-        \item \textbf{Ondas de radio}: Wi-Fi, Bluetooth, 4G/5G. Sensible a
-interferencias, absorcion por objetos y efectos ambientales.
-    \end{itemize}
+    \item \textbf{Capa de aplicacion}: protocolos para aplicaciones de red (HTTP, FTP, DNS, SMTP, etc.).
+    \item \textbf{Capa de transporte}: transmision de datos entre procesos. Protocolos: TCP (fiable) y UDP (rapido).
+    \item \textbf{Capa de Internet (Red)}: direccionamiento y encaminamiento de paquetes. Protocolo: IP.
+    \item \textbf{Capa de enlace de datos}: transmision fisica por el medio (cable, fibra, radio).
 \end{itemize}
 
-
-\section{El modelo TCP/IP}
-
-Para que todos los dispositivos de una red se entiendan, es necesario un
-modelo de capas que organice las funciones de comunicacion. El modelo
-\textbf{TCP/IP} es el estandar de Internet y consta de cuatro capas:
-
-\begin{table}[htbp]
+\begin{figure}[H]
 \centering
-\small
-\caption{Las cuatro capas del modelo TCP/IP}
-\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Capa} & \textbf{Funcion} \\
-\midrule
-Aplicacion & Interfaz con el usuario. Protocolos: HTTP, FTP, DNS, SMTP... \\
-Transporte & Entrega fiable o rapida de datos. Protocolos: TCP (fiable), UDP (rapido). \\
-Internet (Red) & Direccionamiento y encaminamiento de paquetes. Protocolo: IP. \\
-Enlace de datos & Transmision fisica por el medio (cable, fibra, radio). Ethernet, Wi-Fi... \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.1.png}
+\caption{Pila de protocolos TCP/IP}
+\label{fig:pila-tcpip}
+\end{figure}
 
-\subsection{TCP frente a UDP}
 
-En la capa de transporte, los dos protocolos mas importantes son:
+\section{TCP}
 
-\begin{definicion}{TCP y UDP}
-\textbf{TCP} (Transmission Control Protocol) es un protocolo \textbf{orientado a
-conexion} que garantiza la entrega fiable de datos, controlando errores,
-reordenando paquetes y solicitando retransmisiones si es necesario.
+\begin{definicion}
+\textbf{TCP} (Transmission Control Protocol) es un protocolo de la capa de transporte \textbf{orientado a conexion}. Hace fiable la comunicacion: si falta un paquete o hay error, solicita el reenvio. Solo entrega los datos al nivel superior si estan completos.
+\end{definicion}
 
-\textbf{UDP} (User Datagram Protocol) es un protocolo \textbf{sin conexion} que
-envia datos sin garantizar su entrega ni orden. Es mas rapido que TCP y se
-usa en aplicaciones donde la velocidad es prioritaria (streaming, juegos en
-linea, DNS).
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.2.png}
+\caption{Funcionamiento de TCP orientado a conexion}
+\label{fig:funcionamiento-tcp}
+\end{figure}
+
+
+\section{UDP}
+
+\begin{definicion}
+\textbf{UDP} (User Datagram Protocol) es un protocolo de la capa de transporte \textbf{sin conexion}, mas rapido que TCP. No garantiza recepcion ni orden de los datos. Es adecuado cuando la velocidad importa mas que la fiabilidad: juegos en linea, streaming, DNS.
 \end{definicion}
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Comparacion entre TCP y UDP}
+\caption{Comparativa TCP vs UDP}
 \begin{tabularx}{\textwidth}{@{}lXX@{}}
 \toprule
 \textbf{Caracteristica} & \textbf{TCP} & \textbf{UDP} \\
 \midrule
 Conexion & Orientado a conexion & Sin conexion \\
-Fiabilidad & Garantiza entrega y orden & No garantiza nada \\
-Velocidad & Mas lento (overhead de control) & Mas rapido \\
-Control de errores & Si (checksum, ACK, retransmision) & No \\
-Uso tipico & Web, correo, transferencia de archivos & Streaming, juegos, DNS, VoIP \\
+Fiabilidad & Fiable (reenvia paquetes perdidos) & No fiable \\
+Orden de entrega & Entrega ordenada & Sin orden garantizado \\
+Latencia & Mayor latencia & Baja latencia \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.3.png}
+\caption{Comparativa TCP vs UDP}
+\label{fig:comparativa-tcp-udp}
+\end{figure}
 
 
 \section{Direccionamiento IP}
 
-Cada dispositivo conectado a una red necesita un identificador unico: la
-\textbf{direccion IP} (Internet Protocol). En IPv4, es un numero de 32 bits
-representado en notacion decimal con puntos (por ejemplo, 192.168.1.10).
+Cada dispositivo en una red tiene un \textbf{identificador unico}: la direccion IP. Ademas, cada tarjeta de red dispone de una \textbf{direccion MAC} (Media Access Control), una direccion fisica unica de 48 bits asignada por el fabricante.
 
-\begin{definicion}{Direccion IP}
-Una \textbf{direccion IP} es un identificador numerico de 32 bits (IPv4) o 128 bits
-(IPv6) asignado a cada dispositivo conectado a una red. Permite localizar
-el dispositivo dentro de la red y enrutar los paquetes hacia el.
+\begin{definicion}
+Una \textbf{direccion IP} es un identificador numerico que permite localizar un dispositivo dentro de la red y enrutar los paquetes hacia el.
 \end{definicion}
 
-\subsection{Estructura de una direccion IPv4}
+\subsection{Representacion IP}
 
-Una direccion IPv4 se divide en dos partes:
 \begin{itemize}
-    \item \textbf{Parte de red}: identifica la red a la que pertenece el dispositivo.
-    \item \textbf{Parte de host}: identifica el dispositivo concreto dentro de esa red.
+    \item Secuencia de \textbf{32 bits} (4 octetos).
+    \item Notacion decimal punteada: \texttt{192.168.1.2}.
+    \item Cada octeto: 8 bits, valores de 0 a 255.
 \end{itemize}
 
-La separacion entre red y host viene dada por la \textbf{mascara de subred}
-(subnet mask), tambien de 32 bits. Los bits a 1 en la mascara indican la parte
-de red; los bits a 0, la parte de host.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.4.png}
+\caption{Formato de una direccion IP de 32 bits}
+\label{fig:formato-ip}
+\end{figure}
 
-Por ejemplo, con la mascara 255.255.255.0 (/24), los primeros 24 bits (3
-octetos) son la red y el ultimo octeto es el host.
+\subsection{IP Dinamica}
 
-\subsection{Clases de direcciones IP}
+Asignada por un servidor \textbf{DHCP} al conectarse. Cambia cada vez que el dispositivo se reconecta. Tipica en hogares.
 
-Historicamente, las direcciones IP se dividieron en clases para facilitar su
-asignacion:
+\subsection{IP Fija}
+
+No cambia. Usada en empresas para identificar servidores, administradores, etc.
+
+
+\section{Direccionamiento IP con Clase}
+
+Historicamente, las direcciones IP se dividieron en clases. Cada IP tiene dos partes: \textbf{red} y \textbf{host}. Los octetos dedicados a cada una definen la clase.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.5.png}
+\caption{Estructura de direcciones IP con clase}
+\label{fig:ip-con-clase}
+\end{figure}
+
+\subsection{Clase A}
+
+\begin{itemize}
+    \item Red: 1.\textsuperscript{er} octeto. Host: 3 octetos restantes.
+    \item 1.\textsuperscript{er} bit siempre \texttt{0}.
+    \item Rango: 1 -- 126.
+    \item Hasta ~16 millones de hosts por red.
+\end{itemize}
+
+\subsection{Clase B}
+
+\begin{itemize}
+    \item Red: 1.\textsuperscript{er} y 2.\textsuperscript{o} octeto. Host: 3.\textsuperscript{er} y 4.\textsuperscript{o} octeto.
+    \item 1.\textsuperscript{er} bits siempre \texttt{10}.
+    \item Rango: 128 -- 191.
+    \item Redes de tamano moderado a grande.
+\end{itemize}
+
+\subsection{Clase C}
+
+\begin{itemize}
+    \item Red: 1.\textsuperscript{er}, 2.\textsuperscript{o} y 3.\textsuperscript{er} octeto. Host: 4.\textsuperscript{o} octeto.
+    \item 1.\textsuperscript{er} bits siempre \texttt{110}.
+    \item Rango: 192 -- 223.
+    \item Maximo 254 hosts por red. Uso mas frecuente.
+\end{itemize}
+
+\subsection{Clase D}
+
+\begin{itemize}
+    \item Para \textbf{multicast}: un paquete se envia a un grupo predefinido de IPs.
+    \item 1.\textsuperscript{er} bits siempre \texttt{1110}.
+    \item Rango: 224 -- 239.
+\end{itemize}
+
+\subsection{Clase E}
+
+\begin{itemize}
+    \item Reservada para investigacion (IETF).
+    \item Rango: 240 -- 255.
+\end{itemize}
+
+\subsection{Resumen de clases}
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Clases de direcciones IPv4}
-\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\caption{Resumen de clases de direcciones IP}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
 \toprule
-\textbf{Clase} & \textbf{Rango del primer octeto} & \textbf{Uso} \\
+\textbf{Clase} & \textbf{Rango (1.\textsuperscript{er} octeto)} & \textbf{Uso} \\
 \midrule
-A & 1 -- 126 & Redes muy grandes (16 millones de hosts) \\
-B & 128 -- 191 & Redes medianas (65.000 hosts) \\
+A & 1 -- 126 & Redes muy grandes (~16M hosts) \\
+B & 128 -- 191 & Redes medianas (65.534 hosts) \\
 C & 192 -- 223 & Redes pequenas (254 hosts) \\
-D & 224 -- 239 & Multicast (grupos de receptores) \\
-E & 240 -- 255 & Reservado para investigacion \\
+D & 224 -- 239 & Multicast \\
+E & 240 -- 255 & Investigacion \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\textbf{Direcciones privadas} (no enrutables en Internet):
-\begin{itemize}
-    \item Clase A: 10.0.0.0 -- 10.255.255.255
-    \item Clase B: 172.16.0.0 -- 172.31.255.255
-    \item Clase C: 192.168.0.0 -- 192.168.255.255
-\end{itemize}
+\subsection{Direcciones de redes privadas}
 
-\subsection{Gateway (puerta de enlace)}
+\begin{table}[htbp]
+\centering
+\small
+\caption{Direcciones de redes privadas}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Clase} & \textbf{Rango} \\
+\midrule
+A & 10.0.0.0 -- 10.255.255.255 \\
+B & 172.16.0.0 -- 172.31.255.255 \\
+C & 192.168.0.0 -- 192.168.255.255 \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-El \textbf{gateway} o puerta de enlace es la direccion IP del dispositivo que
-conecta una red local con el exterior (otra red o Internet). Cuando un host
-quiere enviar un paquete a una direccion que no pertenece a su propia red,
-lo envia al gateway, que se encarga de encaminarlo.
-
-\begin{definicion}{Gateway (puerta de enlace)}
-El \textbf{gateway} es la direccion IP del dispositivo de interconexion (router)
-que actua como salida de una red local. Todos los hosts de la red deben
-conocer la direccion del gateway para poder comunicarse con dispositivos
-externos.
-\end{definicion}
-
-
-\section{Dispositivos de interconexion: switch y router}
-
-\subsection{Switch (conmutador)}
-
-Un \textbf{switch} es un dispositivo que opera en la capa de enlace de datos
-(Capa 2 del modelo OSI). Su funcion es conectar multiples dispositivos dentro
-de una misma red local (LAN), reenviando los paquetes de datos solo al
-puerto al que esta conectado el destinatario.
-
-\begin{definicion}{Switch}
-Un \textbf{switch} es un dispositivo de interconexion de red que opera en la capa
-de enlace de datos. Conecta multiples dispositivos dentro de una misma red
-local y reenvia los paquetes unicamente al puerto del destinatario,
-mejorando la eficiencia respecto a un hub.
-\end{definicion}
-
-El switch aprende las direcciones MAC de los dispositivos conectados y
-construye una tabla de conmutacion. Cuando recibe un paquete, consulta esta
-tabla para saber por que puerto debe reenviarlo.
-
-\subsection{Router (encaminador)}
-
-Un \textbf{router} es un dispositivo que opera en la capa de red (Capa 3). Su
-funcion es interconectar diferentes redes, tomando decisiones sobre el camino
-que deben seguir los paquetes para llegar a su destino.
-
-\begin{definicion}{Router}
-Un \textbf{router} o encaminador es un dispositivo de interconexion de red que opera
-en la capa de red. Conecta diferentes redes (por ejemplo, dos LAN con
-diferentes rangos de IP) y encamina los paquetes entre ellas mediante tablas
-de rutas.
-\end{definicion}
-
-Un router tiene al menos dos interfaces de red (tarjetas de red), cada una
-conectada a una red diferente y con una direccion IP correspondiente a esa
-red. Cuando un paquete llega, el router consulta su \textbf{tabla de
-encaminamiento} para decidir por que interfaz debe reenviarlo.
-
-\subsection{Tabla de encaminamiento}
-
-La \textbf{tabla de encaminamiento} (o tabla de rutas) es la estructura de datos
-que utiliza un router para decidir como reenviar un paquete. Cada entrada
-contiene:
+\subsection{Direcciones de red y especiales}
 
 \begin{itemize}
-    \item \textbf{Destino}: direccion de red de destino.
-    \item \textbf{Mascara}: mascara de subred del destino.
-    \item \textbf{Siguiente salto (next hop)}: direccion IP del siguiente router o
-    dispositivo al que hay que enviar el paquete.
-    \item \textbf{Coste}: metrica que indica la ``distancia'' o preferencia de la ruta.
+    \item \textbf{Direccion de red}: todos los bits de host a 0 (ej. \texttt{113.0.0.0} en clase A).
+    \item \textbf{Direccion de difusion (broadcast)}: todos los bits de host a 1.
+    \item \textbf{Direccion de multidifusion}: todos los bits de red a 1.
 \end{itemize}
 
-\begin{definicion}{Tabla de encaminamiento}
-Una \textbf{tabla de encaminamiento} es la estructura de datos que utiliza un
-router para determinar la mejor ruta hacia un destino. Contiene entradas con
-el destino, la mascara, el siguiente salto (next hop) y el coste asociado.
+
+\section{CIDR (Enrutamiento sin Clases)}
+
+El direccionamiento \textbf{CIDR} (Classless Inter-Domain Routing) reemplazo el direccionamiento por clases para mayor flexibilidad.
+
+\begin{definicion}
+\textbf{CIDR} es un metodo de asignacion de direcciones IP que permite crear redes de cualquier tamano mediante la \textbf{notacion de prefijo}. Por ejemplo, \texttt{192.168.1.0/24} indica que los primeros 24 bits son la red.
 \end{definicion}
 
-
-\section{Encaminamiento: como los paquetes encuentran su camino}
-
-El \textbf{encaminamiento} (routing) es el proceso de seleccionar el camino optimo
-para enviar un paquete desde su origen hasta su destino a traves de una red
-interconectada.
-
-\subsection{Tipos de encaminamiento}
-
+Ventajas:
 \begin{itemize}
-    \item \textbf{Encaminamiento estatico}: las rutas se configuran manualmente en
-    los routers. Es sencillo pero no se adapta a cambios en la red.
-    \item \textbf{Encaminamiento dinamico}: los routers intercambian informacion
-    periodicamente y construyen sus tablas automaticamente. Se adapta a
-    fallos y cambios de topologia. Protocolos: RIP (vector distancia), OSPF
-    (estado de enlace).
-    \item \textbf{Encaminamiento por difusion (broadcasting)}: envia el paquete a
-    todos los nodos. Muy ineficiente pero robusto (flooding).
-    \item \textbf{Encaminamiento por camino mas corto}: se minimiza el numero de
-    saltos entre origen y destino (o algun otro coste, como retardo o ancho
-    de banda).
+    \item Permite crear redes de cualquier tamano, no limitadas a las clases A, B o C.
+    \item \textbf{Agregacion de rutas (supernetting)}: una entrada en la tabla de enrutamiento puede representar multiples redes.
 \end{itemize}
 
-\subsection{Encaminamiento en la practica: de una LAN a otra}
+\subsection{Mascaras comunes}
 
-Cuando un ordenador de la red 192.168.10.0 quiere enviar un paquete a otro
-ordenador de la misma red, el switch lo entrega directamente (consultando su
-tabla MAC).
+\begin{table}[htbp]
+\centering
+\small
+\caption{Mascaras de subred comunes en notacion CIDR}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+\textbf{Prefijo CIDR} & \textbf{Mascara} & \textbf{Hosts utiles} \\
+\midrule
+/30 & 255.255.255.252 & 2 \\
+/28 & 255.255.255.240 & 14 \\
+/24 & 255.255.255.0 & 254 \\
+/16 & 255.255.0.0 & 65.534 \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-Cuando quiere enviar un paquete a un ordenador de la red 192.168.20.0, el
-ordenador detecta que la direccion destino no pertenece a su red (comparando
-su propia IP y mascara con la IP destino). Entonces envia el paquete a su
-\textbf{gateway} (192.168.10.254), que es el router. El router recibe el paquete por
-su interfaz conectada a 192.168.10.0, consulta su tabla de rutas, ve que la
-red 192.168.20.0 es alcanzable a traves de su otra interfaz (192.168.20.254),
-y reenvia el paquete.
 
-Este proceso es la base de la comunicacion entre redes (\textbf{inter-networking}),
-que es precisamente lo que hace posible Internet.
+\section{DNS (Domain Name System)}
+
+El \textbf{DNS} (Sistema de Nombres de Dominio) traduce nombres de dominio (FQDN) a direcciones IP y viceversa. Tiene una estructura \textbf{jerarquica} y bases de datos \textbf{distribuidas}. Normalmente ejecuta \textbf{BIND} (Berkeley Internet Domain Name).
+
+\begin{definicion}
+El \textbf{DNS} es un sistema jerarquico y distribuido que traduce nombres de dominio legibles por humanos (como \texttt{www.upv.es}) a direcciones IP numericas que las redes utilizan para identificar dispositivos.
+\end{definicion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.6.png}
+\caption{Jerarquia y funcionamiento del DNS}
+\label{fig:dns-jerarquia}
+\end{figure}
+
+\subsection{Componentes del DNS}
+
+\begin{itemize}
+    \item \textbf{Root Servers}: 13 servidores raiz (A--M), mayoria en USA.
+    \item \textbf{TLD Servers}: servidores de dominio de nivel superior (.com, .es, etc.).
+    \item \textbf{Authoritative DNS Servers}: servidores autoritativos para un dominio.
+\end{itemize}
+
+\subsection{Tipos de resolucion}
+
+\begin{itemize}
+    \item \textbf{Consulta interactiva}: el servidor consulta a otros y redirige al cliente.
+    \item \textbf{Consulta recursiva}: el servidor resuelve completamente y devuelve la respuesta.
+\end{itemize}
+
+\subsection{DNS Internos vs Externos}
+
+\begin{itemize}
+    \item \textbf{DNS Interno}: resuelve nombres dentro de una red local (compania). Conoce IPs privadas.
+    \item \textbf{DNS Externo / Autoritativo}: visible desde Internet. Solo contiene registros de servicios publicos.
+    \item Los DNS autoritativos se configuran al registrar un dominio a traves de un \textbf{REGISTRAR} acreditado por \textbf{ICANN}.
+\end{itemize}
+
+
+\section{DHCP (Dynamic Host Configuration Protocol)}
+
+El \textbf{DHCP} permite la administracion centralizada de la configuracion IP de los dispositivos de una red.
+
+\begin{definicion}
+\textbf{DHCP} (Dynamic Host Configuration Protocol) es un protocolo que asigna automaticamente direcciones IP y otros parametros de configuracion (mascara, gateway, DNS) a los dispositivos cuando se conectan a la red.
+\end{definicion}
+
+\subsection{Beneficios}
+
+\begin{itemize}
+    \item Administracion centralizada de configuracion IP.
+    \item Configuracion consistente.
+    \item Flexibilidad y escalabilidad.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.7.png}
+\caption{Funcionamiento de DHCP: proceso DORA}
+\label{fig:dhcp-dora}
+\end{figure}
+
+\subsection{Funcionamiento: concesion inicial (DORA)}
+
+\begin{verbatim}
+Cliente -> DHCPDISCOVER -> Servidor
+Cliente <- DHCPOFFER    <- Servidor
+Cliente -> DHCPREQUEST  -> Servidor
+Cliente <- DHCPACK      <- Servidor
+\end{verbatim}
+
+\subsection{Renovacion}
+
+\begin{verbatim}
+Cliente -> DHCPREQUEST -> Servidor
+Cliente <- DHCPACK     <- Servidor
+\end{verbatim}
+
+\subsection{Mensajes DHCP}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Mensajes del protocolo DHCP}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Mensaje} & \textbf{Significado} \\
+\midrule
+DHCPDISCOVER & El cliente pide una IP \\
+DHCPOFFER & El servidor ofrece una concesion \\
+DHCPREQUEST & El cliente solicita una concesion especifica \\
+DHCPACK & El servidor confirma la concesion \\
+DHCPDECLINE & El cliente rechaza la IP ofrecida \\
+DHCPNACK & El servidor deniega la concesion \\
+DHCPRELEASE & El cliente libera la concesion \\
+DHCPINFORM & El cliente pide configuracion adicional \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Puertos}
+
+\begin{itemize}
+    \item Cliente: \textbf{UDP 68}
+    \item Servidor: \textbf{UDP 67}
+\end{itemize}
+
+\subsection{Metodos de configuracion}
+
+\begin{itemize}
+    \item \textbf{Servidores DHCP}: asignan IPs automaticamente.
+    \item \textbf{Agentes DHCP de relevo}: reenvian peticiones entre subredes.
+    \item \textbf{BOOTP}: protocolo predecesor.
+\end{itemize}
+
+\subsection{Ambitos DHCP}
+
+\begin{itemize}
+    \item Definen rangos de direcciones IP asignables.
+    \item Se pueden excluir direcciones manualmente (routers, firewalls, servidores).
+    \item Se pueden crear superambitos combinando multiples ambitos.
+\end{itemize}
 
 
 \section{Practica 4: Cisco Packet Tracer}
@@ -344,7 +431,7 @@ switch.
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla de Packet Tracer mostrando la LAN 192.168.10.0 con 3 PCs, el switch y las etiquetas.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.8.png}
 \caption{Topologia de la primera LAN (192.168.10.0)}
 \label{fig:lan1}
 \end{figure}
@@ -371,13 +458,6 @@ en el rango 192.168.20.0. La configuracion de cada ordenador fue:
 \end{itemize}
 
 Se verifico que los ordenadores de esta segunda LAN se comunicaban entre si.
-
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla de Packet Tracer mostrando la LAN 192.168.20.0 con 3 PCs, el switch y las etiquetas.}\vspace{1.5cm}}}
-\caption{Topologia de la segunda LAN (192.168.20.0)}
-\label{fig:lan2}
-\end{figure}
 
 \subsubsection{Tercera parte: conexion de ambas LAN mediante un router}
 
@@ -408,7 +488,7 @@ Respuesta desde 192.168.20.2: bytes=32 tiempo=1ms TTL=127
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla de la topologia completa con ambas LAN, switches, router y las conexiones etiquetadas.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap3/3.9.png}
 \caption{Topologia completa: interconexion de dos LAN mediante un router}
 \label{fig:topologia-completa}
 \end{figure}
@@ -466,27 +546,12 @@ Modelo TCP/IP (Capa 3) & El ICMP (ping) opera sobre IP, demostrando la funcion d
 \section{Resumen de la Unidad 3}
 
 \begin{itemize}
-    \item Una \textbf{red de computadores} esta compuesta por hosts, enlaces de
-    comunicacion (guiados o no guiados) y dispositivos de conmutacion.
-    \item El \textbf{modelo TCP/IP} organiza la comunicacion en cuatro capas:
-    aplicacion, transporte, internet y enlace. TCP garantiza fiabilidad; UDP
-    prioriza la velocidad.
-    \item El \textbf{direccionamiento IP} permite identificar cada dispositivo en una
-    red. Una direccion IPv4 de 32 bits se divide en parte de red y parte de host,
-    separadas por la \textbf{mascara de subred}.
-    \item Las \textbf{clases de direcciones IP} (A, B, C, D, E) facilitan la asignacion
-    de rangos a redes de diferentes tamanos. Las direcciones privadas permiten
-    redes locales sin consumir IPs publicas.
-    \item El \textbf{gateway} es la direccion del router que permite salir de una red
-    local hacia otra red o hacia Internet.
-    \item Un \textbf{switch} opera en la capa de enlace, conectando dispositivos
-    dentro de una misma LAN mediante reenvio basado en direcciones MAC.
-    \item Un \textbf{router} opera en la capa de red, interconectando diferentes
-    redes y tomando decisiones de encaminamiento mediante su \textbf{tabla de rutas}.
-    \item El \textbf{encaminamiento} puede ser estatico (configurado manualmente) o
-    dinamico (protocolos como RIP u OSPF). El proceso de enviar un paquete de
-    una red a otra es la base de Internet.
-    \item La \textbf{Practica 4} demuestra todos estos conceptos en un entorno
-    simulado: dos LAN conectadas mediante un router, configuracion de IPs,
-    mascaras, gateways y verificacion de conectividad con ping.
+    \item El \textbf{modelo TCP/IP} organiza la comunicacion en cuatro capas: aplicacion, transporte, internet y enlace.
+    \item \textbf{TCP} es un protocolo de transporte orientado a conexion y fiable; \textbf{UDP} es un protocolo sin conexion y mas rapido, adecuado para aplicaciones en tiempo real.
+    \item Cada dispositivo en una red tiene una \textbf{direccion IP} unica de 32 bits (IPv4), representada en notacion decimal punteada. Puede ser \textbf{dinamica} (asignada por DHCP) o \textbf{fija}.
+    \item El \textbf{direccionamiento con clase} (A, B, C, D, E) permite asignar rangos de direcciones segun el tamano de la red. Las \textbf{direcciones privadas} (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) se usan en redes locales.
+    \item \textbf{CIDR} reemplazo el direccionamiento por clases mediante notacion de prefijo (ej. /24), permitiendo crear redes de cualquier tamano y agregar rutas (supernetting).
+    \item El \textbf{DNS} traduce nombres de dominio a direcciones IP mediante una estructura jerarquica de servidores raiz, TLD y autoritativos.
+    \item \textbf{DHCP} asigna automaticamente direcciones IP y configuracion de red a los dispositivos mediante el proceso DORA (Discover, Offer, Request, Acknowledge).
+    \item La \textbf{Practica 4} aplica estos conceptos simulando dos LAN conectadas mediante un router en Cisco Packet Tracer, configurando IPs, mascaras, gateways y verificando conectividad con ping.
 \end{itemize}
