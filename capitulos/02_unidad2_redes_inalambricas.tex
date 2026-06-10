@@ -50,7 +50,11 @@ Una red de computadores está formada por:
 
 \subsubsection{Interconexión de redes}
 
-Cuando se conectan varias redes entre sí mediante un dispositivo de interconexión denominado \textbf{pasarela} o \textbf{router}, se forma una \textbf{inter-red}. \textbf{Internet} es la red de redes resultante de interconectar múltiples redes a nivel mundial.
+Cuando se conectan varias redes entre sí mediante un dispositivo de interconexión denominado \textbf{pasarela} o \textbf{router}, se forma una \textbf{inter-red}.
+
+\begin{definicion}
+\textbf{Internet} es la red de redes resultante de interconectar múltiples redes a nivel mundial mediante routers y conmutación de paquetes, empleando un conjunto común de protocolos (TCP/IP) y un esquema de direccionamiento unificado (direcciones IP).
+\end{definicion}
 
 \begin{figure}[H]
 \centering
@@ -63,9 +67,9 @@ Cuando se conectan varias redes entre sí mediante un dispositivo de interconexi
 
 Para que la red funcione a nivel lógico se necesita:
 
-\begin{itemize}
-    \item \textbf{Protocolos}: conjunto de reglas que regulan la comunicación entre dos partes. Se basan en un modelo pregunta-respuesta.
-\end{itemize}
+\begin{definicion}
+Un \textbf{protocolo} es un conjunto de reglas que regulan la comunicación entre dos partes. Define el formato (sintaxis), la semántica y el orden de los mensajes intercambiados, así como las acciones a realizar en la transmisión y recepción de los mensajes.
+\end{definicion}
 
 \begin{figure}[H]
 \centering
@@ -223,6 +227,10 @@ El núcleo de la red es una malla de encaminadores interconectados. El objetivo 
 
 \subsection{Conmutación de circuito}
 
+\begin{definicion}
+La \textbf{conmutación de circuito} es una técnica en la que se reserva un conjunto de enlaces (circuito) dedicado entre origen y destino durante toda la comunicación. Sigue tres fases: establecimiento de conexión, transferencia de datos y cierre. Los recursos permanecen asociados al circuito aunque no se estén transfiriendo datos. Está diseñada para redes telefónicas y no es óptima para tráfico de datos en ráfagas.
+\end{definicion}
+
 \begin{itemize}
     \item Se reserva un conjunto de enlaces (circuito) por conversación.
     \item \textbf{Tres fases}:
@@ -244,6 +252,10 @@ El núcleo de la red es una malla de encaminadores interconectados. El objetivo 
 \end{figure}
 
 \subsection{Conmutación de paquete}
+
+\begin{definicion}
+La \textbf{conmutación de paquetes} es una técnica en la que los datos se dividen en unidades discretas llamadas \textbf{paquetes}. Cada paquete contiene una cabecera con información de control (direcciones origen y destino) y los datos. Los paquetes viajan de router en router mediante el principio \textbf{Store and Forward}: cada dispositivo los almacena y reenvía al siguiente salto. No se reservan recursos de forma dedicada, por lo que pueden producirse colas y pérdidas.
+\end{definicion}
 
 \subsubsection{Concepto de paquete}
 
@@ -363,6 +375,10 @@ Un paquete de $L = 1000$ bytes (8000 bits) se envía a través de un enlace de 2
 
 \subsection{Arquitectura en capas o niveles}
 
+\begin{definicion}
+La \textbf{arquitectura en capas o niveles} es un modelo jerárquico de comunicaciones en el que las tareas se dividen en niveles. Cada nivel soluciona un objetivo particular, proporciona servicios al nivel superior y es fácilmente reemplazable sin afectar al conjunto. Para cada nivel se emplean uno o más protocolos específicos. Esta modularización facilita la implementación, el mantenimiento y la actualización de los sistemas de comunicaciones.
+\end{definicion}
+
 La complejidad de las comunicaciones aconseja el empleo de modelos jerárquicos:
 \begin{itemize}
     \item Se dividen las tareas en diferentes \textbf{capas o niveles}.
@@ -450,6 +466,10 @@ La arquitectura TCP/IP no dispone de las capas de sesión y presentación. Si se
 \end{figure}
 
 \subsection{Encapsulamiento en TCP/IP}
+
+\begin{definicion}
+El \textbf{encapsulamiento} es el proceso por el cual cada nivel de la pila de protocolos añade su propia cabecera a los datos que recibe del nivel superior. Así, un mensaje de aplicación se envuelve sucesivamente en un segmento de transporte, un datagrama de red y una trama de enlace, cada uno con su información de control específica.
+\end{definicion}
 
 Cada nivel añade su propia cabecera a los datos que recibe del nivel superior:
 
