@@ -5,268 +5,311 @@
 
 \chapter{Introduccion a las Redes Industriales}
 
-Hasta ahora hemos estudiado como comunican dispositivos mediante cables, ondas
-de radio, y como se organizan las redes de computadores mediante direcciones IP,
-switches y routers. Sin embargo, en un entorno de fabricacion o produccion, las
-redes no solo conectan ordenadores: conectan sensores, actuadores, robots, PLCs
-y sistemas de supervision, todo trabajando en tiempo real para controlar procesos
-industriales.
+Hasta ahora hemos estudiado los fundamentos de las redes de computadores: direccionamiento IP, conmutacion, protocolos de transporte y encaminamiento. En un entorno industrial, sin embargo, las redes no solo conectan ordenadores: conectan sensores, actuadores, robots, PLCs y sistemas de supervision, todo trabajando en tiempo real para controlar procesos productivos.
 
-En este capitulo introducimos el concepto de \textbf{redes industriales}, tambien
-conocidas como redes de comunicacion para la automatizacion y control de
-procesos. Veremos que son, como funcionan, que tipos existen y por que son
-fundamentales en la industria moderna.
+En este capitulo introducimos el concepto de \textbf{redes industriales}, tambien conocidas como redes de comunicacion para la automatizacion y control de procesos. Veremos los sistemas industriales distribuidos, la convergencia de TI y TO, los tipos de buses de campo y los principales protocolos industriales como PROFINET, PROFIBUS, EtherCAT y ControlNet.
 
 
-\section{Sistemas industriales distribuidos}
+\section{Sistemas Industriales Distribuidos (SID)}
 
-\subsection{Definicion}
-
-Un \textbf{sistema industrial distribuido} es una arquitectura de control y
-automatizacion donde multiples dispositivos, sensores, actuadores y sistemas
-informaticos estan interconectados para operar de manera descentralizada.
-
-\begin{definicion}{Sistema industrial distribuido}
-Un \textbf{sistema industrial distribuido} es una arquitectura de control donde
-multiples dispositivos (PLCs, sensores, actuadores, robots) comparten la
-responsabilidad de la operacion, interconectados mediante una red de
-comunicacion industrial. Ofrece mayor flexibilidad, escalabilidad y eficiencia
-que los sistemas centralizados tradicionales.
+\begin{definicion}
+Un \textbf{sistema industrial distribuido} es una arquitectura de control y automatizacion donde multiples dispositivos, sensores, actuadores y sistemas informaticos estan interconectados para operar de manera descentralizada. Ofrece mayor flexibilidad, escalabilidad y eficiencia que los sistemas centralizados tradicionales.
 \end{definicion}
 
-En un sistema centralizado clasico, un unico controlador (PLC o computador)
-toma todas las decisiones y envia ordenes a los dispositivos de campo. En un
-sistema distribuido, la inteligencia se reparte: cada dispositivo puede tomar
-decisiones locales y compartir informacion con el resto.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap4/4.1.png}
+\caption{Arquitectura de sistemas industriales distribuidos}
+\label{fig:arquitectura-sid}
+\end{figure}
 
-\subsection{Caracteristicas principales}
-
-Los sistemas industriales distribuidos se caracterizan por:
+\subsection{Caracteristicas}
 
 \begin{itemize}
-    \item \textbf{Descentralizacion}: multiples dispositivos comparten la
-    responsabilidad de la operacion. No hay un unico punto de control.
-    \item \textbf{Interconectividad}: se basan en redes de comunicacion industrial
-    como Ethernet/IP, Modbus, Profibus o IoT industrial.
-    \item \textbf{Escalabilidad}: se pueden agregar nuevos dispositivos sin afectar
-    la operacion global.
-    \item \textbf{Tolerancia a fallos}: al no depender de un unico nodo, el sistema
-    puede seguir funcionando ante fallos parciales.
-    \item \textbf{Optimizacion de recursos}: permite un uso eficiente de energia,
-    maquinaria y mano de obra.
-    \item \textbf{Automatizacion avanzada}: utiliza PLCs, SCADA, IIoT e inteligencia
-    artificial.
+    \item \textbf{Descentralizacion}: multiples dispositivos comparten la responsabilidad, no existe un unico controlador central.
+    \item \textbf{Interconectividad}: redes como Ethernet/IP, Modbus, Profibus o IIoT industrial.
+    \item \textbf{Escalabilidad}: se pueden agregar nuevos dispositivos sin afectar la operacion global.
+    \item \textbf{Tolerancia a fallos}: al no depender de un unico nodo, el sistema sigue funcionando ante fallos parciales.
+    \item \textbf{Optimizacion de recursos}: uso eficiente de energia, maquinaria y mano de obra.
+    \item \textbf{Automatizacion avanzada}: PLCs, SCADA, IIoT e inteligencia artificial.
 \end{itemize}
 
-\subsection{Aplicaciones y ventajas}
+\subsection{Aplicaciones}
 
-Las aplicaciones mas comunes incluyen:
 \begin{itemize}
     \item \textbf{Automatizacion de fabricas}: produccion y ensamblaje de productos.
-    \item \textbf{Redes de energia inteligente (Smart Grid)}: gestion eficiente de
-    energia electrica.
-    \item \textbf{Transporte y logistica}: control distribuido en almacenes y vehiculos
-    autonomos.
+    \item \textbf{Redes inteligentes (Smart Grid)}: gestion eficiente de energia electrica.
+    \item \textbf{Transporte y logistica}: control distribuido en almacenes y vehiculos autonomos.
     \item \textbf{Industria 4.0}: implementacion de IoT y Big Data para optimizacion.
-    \item \textbf{Robotica industrial}: control distribuido en lineas de produccion.
+    \item \textbf{Robotica industrial}: control distribuido en lineas de produccion con multiples robots.
 \end{itemize}
 
-Las ventajas principales son: mayor eficiencia operativa, reduccion de costes de
-mantenimiento, mayor adaptabilidad a cambios en la produccion, y mejora en la
-recopilacion y analisis de datos.
-
-
-\section{Redes industriales: conceptos fundamentales}
-
-\subsection{Definicion}
-
-\begin{definicion}{Red industrial}
-Una \textbf{red industrial} es una estructura de comunicacion automatizada que
-gestiona procesos industriales, involucrando actuadores, computadoras, maquinas,
-sensores, interfaces, medios de comunicacion (fibra optica, cables, redes
-inalambricas) y robots. Su objetivo es transmitir y compartir datos para garantizar
-un funcionamiento eficiente de los procesos productivos.
-\end{definicion}
-
-\subsection{Como funcionan}
-
-Las redes industriales reemplazan el modelo tradicional de control cableado a
-mano (donde cada dispositivo necesitaba su propio cable de control) por un modelo
-de comunicacion digital donde multiples dispositivos comparten un unico medio de
-transmision.
-
-Este modelo reduce drasticamente la cantidad de cableado necesario, simplifica
-la organizacion del sistema y permite una flexibilidad mucho mayor para
-reconfigurar la produccion.
-
-\subsection{Convergencia de TI y TO (OT)}
-
-En la industria moderna se distinguen dos tecnologias:
+\subsection{Ventajas}
 
 \begin{itemize}
-    \item \textbf{TI (Tecnologia de la Informacion)}: se ocupa de la entrega de
-    informacion cuando un profesional la solicita. Sistemas de datos, ERP, CRM.
-    \item \textbf{TO (Tecnologia Operacional) o OT}: trabaja con la entrega de
-    informacion en un momento especifico bajo una condicion determinada.
-    Controla equipos industriales en tiempo real.
+    \item Mayor eficiencia operativa.
+    \item Reduccion de costes de mantenimiento y produccion.
+    \item Mayor adaptabilidad a cambios en la produccion.
+    \item Mejora en la recopilacion y analisis de datos.
 \end{itemize}
 
-La convergencia de TI y TO esta relacionada con el auge del \textbf{edge computing}
-(computacion en el borde): trasladar los recursos informaticos a la ubicacion
-fisica de la fuente de datos (por ejemplo, en la propia fabrica), permitiendo unificar
-sistemas que tradicionalmente estaban aislados.
+
+\section{Redes Industriales}
+
+\begin{definicion}
+Una \textbf{red industrial} es una estructura de comunicacion automatizada que gestiona procesos industriales, involucrando actuadores, computadoras, maquinas, sensores, interfaces, medios de comunicacion (fibra optica, cables, redes inalambricas) y robots. Su objetivo es transmitir y compartir datos para garantizar un funcionamiento eficiente de los procesos productivos.
+\end{definicion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap4/4.2.png}
+\caption{Redes industriales y sus componentes}
+\label{fig:redes-industriales}
+\end{figure}
+
+\textbf{Protocolos principales}: PROFINET, SensorBus, DeviceBus, FieldBus, PROFIBUS, EtherNet/IP, DeviceNet, CANopen, EtherCAT, Modbus, AS-i, ControlNet.
+
+\subsection{Evolucion del cableado}
+
+\begin{itemize}
+    \item \textbf{Modelo antiguo}: un cable fisico por cada dispositivo, generando cuellos de botella.
+    \item \textbf{Modelo actual}: un unico medio fisico maneja multiples variables de comunicacion.
+\end{itemize}
 
 \subsection{Desafios}
 
-Las redes industriales enfrentan desafios especificos:
 \begin{itemize}
-    \item \textbf{Complejidad en la integracion}: sistemas heterogeneos de diferentes
-    fabricantes deben comunicarse.
-    \item \textbf{Ciberseguridad}: las redes industriales son objetivos criticos; un ataque
-    puede parar la produccion.
-    \item \textbf{Capacitacion especializada}: requiere personal con conocimientos en
-    automatizacion y redes.
+    \item \textbf{Complejidad en la integracion}: sistemas heterogeneos de diferentes fabricantes deben comunicarse.
+    \item \textbf{Ciberseguridad robusta}: las redes industriales son objetivos criticos; un ataque puede parar la produccion.
+    \item \textbf{Capacitacion especializada}: requiere personal con conocimientos en automatizacion y redes.
 \end{itemize}
 
 
-\section{Clasificacion de las redes industriales}
+\section{TI vs TO (Tecnologia de la Informacion vs Tecnologia Operacional)}
 
-Las redes industriales se clasifican segun el nivel de la piramide de automatizacion:
+\begin{definicion}
+\textbf{TI (Tecnologia de la Informacion)} entrega informacion cuando un profesional la solicita. Son sistemas de datos para resolver problemas empresariales (ERP, CRM).
 
-\begin{table}[htbp]
+\textbf{TO (Tecnologia Operacional)} entrega informacion en un momento especifico bajo una condicion determinada. Controla equipos industriales (fabricacion, energia, medicina, edificios) mediante comandos que fluyen siguiendo un orden logico preprogramado.
+\end{definicion}
+
+\subsection{Convergencia TI-TO}
+
+La convergencia de TI y TO esta relacionada con el auge del \textbf{edge computing} (computacion en el borde): trasladar los recursos informaticos a la ubicacion fisica de la fuente de datos (por ejemplo, en la propia fabrica). Esto permite unificar sistemas de datos del area comercial y las operaciones, habilitando IA/ML para control de calidad y mantenimiento predictivo.
+
+\subsection{Ventajas de las redes industriales}
+
+\begin{itemize}
+    \item Diagnostico de problemas en tiempo real.
+    \item Reduccion de tiempos de inactividad.
+    \item Reduccion de gastos energeticos.
+    \item Gestion remota.
+    \item Aumento de productividad y seguridad (maquinas realizan tareas complejas/peligrosas).
+\end{itemize}
+
+
+\section{Aplicaciones de las Redes Industriales}
+
+\begin{figure}[H]
 \centering
-\small
-\caption{Niveles de las redes industriales}
-\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Nivel} & \textbf{Funcion} & \textbf{Ejemplos} \\
-\midrule
-Nivel de informacion (gestion) & Planificacion, ERP, MES & Redes Ethernet, TCP/IP, bases de datos \\
-Nivel de control & Controladores, PLCs, SCADA & ControlNet, Ethernet/IP \\
-Nivel de campo y proceso & Sensores, actuadores, transmisores & Profibus, Modbus, CAN \\
-Nivel de entrada/salida & Dispositivos simples, fotocelulas & AS-i, Sensor Bus \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\subsection{Clasificacion por funcionalidad}
-
-Segun sus capacidades y el tipo de datos que transportan:
+\includegraphics[width=0.8\textwidth]{assets/cap4/4.3.png}
+\caption{Aplicaciones de las redes industriales}
+\label{fig:aplicaciones-rrii}
+\end{figure}
 
 \begin{enumerate}
-    \item \textbf{Sensor Bus (buses de sensores)}: conectan sensores digitales y
-    actuadores simples. Transmite pocos datos, distancias cortas, bajo costo.
-    Ejemplos: AS-i, CAN, Interbus.
-    \item \textbf{Device Bus (buses de dispositivos)}: intermedian entre sensores y
-    PLCs. Manejan variables de proceso (presion, temperatura, flujo).
-    Alcance hasta 500 metros. Ejemplos: Modbus, Profibus DP, DeviceNet.
-    \item \textbf{Field Bus (buses de campo)}: permiten que varios instrumentos se
-    comuniquen en red para control y monitoreo. Conectan mas equipos a mayor
-    distancia. Ejemplos: Foundation Fieldbus, Profibus PA.
-    \item \textbf{Control Bus / Ethernet Industrial}: redes de alta velocidad para
-    control en tiempo real. Ejemplos: Ethernet/IP, PROFINET, EtherCAT, ControlNet.
+    \item \textbf{Redes en empresas}: conectan computadoras entre departamentos (LAN/WAN). Comunicacion eficiente y prevencion de accesos no autorizados.
+    \item \textbf{Redes en operaciones de negocio}: conectan sistemas en diferentes edificios o ubicaciones.
+    \item \textbf{Redes de supervision}: conectan computadoras para supervisar otras computadoras y sistemas (manufactura).
+    \item \textbf{Redes de control de procesos}: transmiten datos entre unidades de control y medicion. Baja sensibilidad electromagnetica y tecnicas de conexion prioritaria.
 \end{enumerate}
 
-\subsection{Tabla comparativa de tipos de redes industriales}
+
+\section{Tipos de Redes Industriales}
+
+\subsection{Definicion de Bus}
+
+\begin{definicion}
+Un \textbf{bus} es un sistema de comunicacion que transfiere datos entre dispositivos (ej. USB). Un \textbf{bus industrial} transfiere datos entre componentes en los niveles de informacion, control y campo de una planta.
+\end{definicion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap4/4.4.png}
+\caption{Clasificacion de buses de campo}
+\label{fig:clasificacion-buses}
+\end{figure}
+
+\subsection{Clasificacion de buses de campo}
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Comparacion de tipos de redes industriales}
-\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\caption{Clasificacion de buses de campo}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
 \toprule
-\textbf{Tipo} & \textbf{Velocidad} & \textbf{Funcionalidad} & \textbf{Uso tipico} \\
+\textbf{Criterio} & \textbf{Tipos} \\
 \midrule
-Sensor Bus & Baja & Simple & Sensores, actuadores binarios \\
-Device Bus & Media & Media & Transmisores, servomotores \\
-Field Bus & Media & Alta & Control de procesos continuos \\
-Ethernet Industrial & Alta & Muy alta & Control en tiempo real, integracion TI/TO \\
+Amplio & Puede estar en cualquier nivel CIM \\
+Estricto & SENSORBUS, DEVICEBUS, FIELDBUS, CONTROLBUS \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
+\subsection{Atendiendo a capacidades}
 
-\section{Principales protocolos de redes industriales}
+\begin{table}[htbp]
+\centering
+\small
+\caption{Clasificacion por capacidades}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Tipo} & \textbf{Ejemplos} \\
+\midrule
+\textbf{Sensor bus} & CAN, ASI, Seriplex, LonWorks \\
+\textbf{Device bus} & DeviceNet, Profibus DP, SDS, Interbus-S \\
+\textbf{Field bus} & Foundation Fieldbus, Profibus \\
+\textbf{Control bus} & HSE (High-Speed Ethernet), ControlNet \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Buses de alta velocidad y baja funcionalidad}
+
+Integran dispositivos simples (fotocelulas, reles, actuadores) con aplicaciones en tiempo real en una pequena zona (una maquina). Implementan capa fisica y capa de enlace. Ejemplos:
+
+\begin{itemize}
+    \item \textbf{CAN}: utilizado en automocion.
+    \item \textbf{SDS}: sensores y actuadores basado en CAN.
+    \item \textbf{ASI}: bus serie para sensores y actuadores.
+\end{itemize}
+
+
+\section{Principales tipos de redes industriales (detalle)}
+
+\subsection{Sensor bus}
+
+\begin{definicion}
+Un \textbf{Sensor bus} conecta redes de sensores digitales y actuadores. Transmite datos pequenos con bajo procesamiento, no cubre largas distancias y lleva informacion de sensores a las tarjetas de E/S del PLC.
+\end{definicion}
+
+Redes tipicas: ASI, CAN, Interbus.
+
+\subsection{Device bus}
+
+\begin{definicion}
+Un \textbf{Device bus} intermedia entre el Sensor bus y el Fieldbus. Transmite senales analogicas y digitales del suelo de fabrica al PLC, controlando lazos y variables de proceso (presion, nivel, flujo, temperatura).
+\end{definicion}
+
+Alcance hasta 500 metros. Ejemplos: Modbus, Profibus DP, DeviceNet.
+
+\subsection{Fieldbus}
+
+\begin{definicion}
+Un \textbf{Fieldbus} permite que senales de transmisores, posicionadores y analizadores lleguen al PLC. Varios instrumentos se conectan en red para control y monitoreo, con bajo costo de implementacion.
+\end{definicion}
+
+Ejemplos: Foundation Fieldbus, Profibus PA (petroquimica, mineria).
+
+\subsection{Redes Ethernet}
+
+Simplicidad, eficiencia y bajo costo. Usa switches, gateways y firewalls. Constante evolucion. Usada tanto en industria como en ambito domestico.
+
+\subsection{Redes TCP/IP}
+
+Conjunto de protocolos estandar para comunicacion entre computadoras y sistemas automatizados. Ventajas: estandarizacion, interconectividad, enrutamiento, conexion a internet y robustez. Ejemplo: Modbus/TCP.
 
 \subsection{PROFINET}
 
-PROFINET es una solucion de Ethernet Industrial abierta basada en estandares
-internacionales. Es el protocolo de comunicacion desarrollado para intercambiar
-datos entre controladores y dispositivos en un sector automatizado.
+\begin{definicion}
+\textbf{PROFINET} es una solucion de Ethernet Industrial abierta, basada en estandares internacionales, desarrollada para intercambiar datos entre controladores y dispositivos en un sector automatizado.
+\end{definicion}
 
-Utiliza Ethernet estandar como medio de comunicacion, lo que permite que otros
-protocolos Ethernet (SNMP, MQTT, HTTP) coexistan en la misma infraestructura.
-Ademas, define la comunicacion ciclica y aciclica entre componentes, incluyendo
-diagnosticos, seguridad funcional, alarmas e informacion adicional.
+Estandar abierto con cientos de fabricantes. Define comunicacion ciclica y aciclica (diagnosticos, seguridad funcional, alarmas). Coexiste con otros protocolos Ethernet (SNMP, MQTT, HTTP).
 
 \subsection{PROFIBUS}
 
-PROFIBUS es una red digital que proporciona comunicacion entre sensores de
-campo y controladores. Surgio inicialmente como PROFIBUS FMS (Fieldbus Message
-Specification), pero hoy en dia los mas utilizados son:
-
-\begin{itemize}
-    \item \textbf{PROFIBUS DP} (Decentralised Peripherals): para automatizacion de
-    fabricas, comunicacion rapida entre PLCs y dispositivos de campo.
-    \item \textbf{PROFIBUS PA} (Process Automation): para procesos continuos como
-    industrias petroquimica y minera.
-\end{itemize}
+\begin{definicion}
+\textbf{PROFIBUS} es una red digital que proporciona comunicacion entre sensores de campo y controladores. Evoluciono desde PROFIBUS FMS hasta PROFIBUS DP (Decentralised Peripherals) y PROFIBUS PA (Process Automation).
+\end{definicion}
 
 \subsection{EtherCAT}
 
-EtherCAT (Ethernet for Control Automation Technology) es un protocolo que lleva
-la potencia y flexibilidad de Ethernet a la automatiz industrial, al control de
-movimientos y a los sistemas de control en tiempo real.
-
-Fue desarrollado por Beckhoff Automation y estandarizado bajo IEC 61158. Es
-mantenido por el EtherCAT Technology Group (ETG). Su principal ventaja es la
-extremada velocidad de transmision y la sincronizacion precisa de los dispositivos.
+\begin{definicion}
+\textbf{EtherCAT} (Ethernet for Control Automation Technology) es un protocolo de alto rendimiento en tiempo real y adquisicion de datos. Desarrollado por Beckhoff Automation, estandarizado bajo IEC 61158 y mantenido por el EtherCAT Technology Group (ETG).
+\end{definicion}
 
 \subsection{ControlNet}
 
-ControlNet utiliza el Protocolo Industrial Comun (CIP) para las capas superiores
-del modelo OSI. Se desarrollo para ofrecer control confiable y de alta velocidad,
-con transferencia de datos I/O programada en momentos especificos.
+\begin{definicion}
+\textbf{ControlNet} usa el Protocolo Industrial Comun (CIP) para las capas superiores del modelo OSI. Ofrece control confiable y de alta velocidad con transferencia de datos I/O programada, garantizando que los mensajes criticos no dependientes del tiempo no interfieran en el control.
+\end{definicion}
 
-Garantiza que los mensajes criticos que no dependen del tiempo se ejecuten sin
-interferir en la transferencia de datos de control. Se utiliza normalmente para
-aplicaciones redundantes.
+Dispositivos tipicos: PLC, HMI, PCs, drives, robots, chasis I/O. Usado en aplicaciones redundantes.
 
-\subsection{Ethernet en la industria: importancia en la Industria 4.0}
 
-Ethernet se ha convertido en el estandar mundial para la intercomunicacion de
-datos en red porque:
+\section{Ethernet en la Industria}
+
+\subsection{Historia}
+
+Ethernet se invento en 1973 en Xerox PARC (Robert Metcalfe, David Boggs, Chuck Thacker, Butler Lampson). A finales de los 90 y principios de los 2000, el fieldbus predominaba, pero Ethernet fue ganando terreno.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap4/4.5.png}
+\caption{Evolucion de Ethernet en la industria}
+\label{fig:evolucion-ethernet}
+\end{figure}
+
+Ventajas frente a otras redes:
 \begin{itemize}
-    \item Tiene una implementacion simple y costos reducidos.
-    \item Permite el uso de varios protocolos en un entorno industrial.
-    \item Es interoperable y escalable para las demandas.
-    \item Sigue en constante evolucion y mejora.
+    \item Implementacion mas simple.
+    \item Costos reducidos.
+    \item Multiples protocolos en un entorno industrial.
+    \item Constante evolucion.
+    \item Interoperable y escalable.
+    \item Aplicable en cualquier espacio.
 \end{itemize}
 
-En la \textbf{Industria 4.0}, la informacion fluye horizontal y verticalmente a traves
-de toda la organizacion. Esto requiere una infraestructura de comunicacion que
-abarque todas las maquinas, computadoras, robots y equipos, lo cual solo es
-posible con Ethernet e Internet unidos al IIoT (Internet Industrial de las Cosas).
+\subsection{Importancia en Industria 4.0 e IIoT}
+
+\begin{definicion}
+La \textbf{Industria 4.0} es la cuarta revolucion industrial: produccion conectada al entorno digital, donde la informacion se comparte entre usuarios y maquinas. Requiere una infraestructura de comunicacion que abarque todas las maquinas, computadoras, robots y equipos, posible gracias al \textbf{IIoT} (Internet Industrial de las Cosas) y \textbf{Big Data}.
+\end{definicion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap4/4.6.png}
+\caption{Industria 4.0 e IIoT}
+\label{fig:industria-4-0}
+\end{figure}
+
+Ethernet e Internet son la base de esta conectividad, permitiendo que la informacion fluya horizontal y verticalmente a traves de toda la organizacion.
+
+\subsection{Trabajo remoto y Cobots}
+
+\begin{definicion}
+Los \textbf{cobots} (robots colaborativos) automatizan tareas poco ergonomicas, monotonas y repetitivas, liberando a los trabajadores para tareas de mayor valor agregado.
+\end{definicion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap4/4.7.png}
+\caption{Cobots en la Industria 4.0}
+\label{fig:cobots}
+\end{figure}
+
+Ventajas: flexibilidad, facil implementacion, poco espacio, facilidad de programacion. Ejemplo: ecosistema UR+ de Universal Robots (soluciones que aumentan la conectividad del cobot a redes industriales y mantenimiento predictivo).
 
 
 \section{Resumen de la Unidad 4}
 
 \begin{itemize}
-    \item Los \textbf{sistemas industriales distribuidos} descentralizan el control,
-    permitiendo que multiples dispositivos compartan la responsabilidad de la
-    operacion y mejoren la tolerancia a fallos.
-    \item Una \textbf{red industrial} es una estructura de comunicacion que gestiona
-    procesos industriales, conectando sensores, actuadores, PLCs, robots y
-    sistemas de supervision.
-    \item La \textbf{convergencia de TI y TO} (OT) unifica los sistemas de informacion
-    empresarial con los sistemas de control en tiempo real, facilitando el
-    \textbf{edge computing} y la Industria 4.0.
-    \item Las redes industriales se clasifican en niveles: informacion, control,
-    campo y E/S. Por funcionalidad: Sensor Bus, Device Bus, Field Bus y
-    Ethernet Industrial.
-    \item Los principales protocolos son: \textbf{PROFINET}, \textbf{PROFIBUS},
-    \textbf{EtherCAT}, \textbf{ControlNet}, \textbf{Modbus}, \textbf{Ethernet/IP}.
-    \item \textbf{Ethernet} es el estandar dominante en la industria moderna por su
-    simplicidad, bajo costo, interoperabilidad y capacidad para soportar
-    multiples protocolos simultaneamente.
+    \item Los \textbf{sistemas industriales distribuidos} descentralizan el control, permitiendo que multiples dispositivos compartan la responsabilidad de la operacion y mejoren la tolerancia a fallos.
+    \item Una \textbf{red industrial} es una estructura de comunicacion automatizada que gestiona procesos industriales conectando sensores, actuadores, PLCs, robots y sistemas de supervision.
+    \item La \textbf{convergencia de TI y TO} unifica los sistemas de informacion empresarial con los sistemas de control en tiempo real, facilitando el \textbf{edge computing} y la Industria 4.0.
+    \item Los \textbf{buses de campo} se clasifican en Sensor bus, Device bus, Field bus y Control bus segun su capacidad y funcionalidad.
+    \item Los principales protocolos industriales son \textbf{PROFINET}, \textbf{PROFIBUS}, \textbf{EtherCAT}, \textbf{ControlNet}, \textbf{Modbus} y \textbf{Ethernet/IP}.
+    \item \textbf{Ethernet} es el estandar dominante en la industria moderna por su simplicidad, bajo costo, interoperabilidad y soporte para multiples protocolos.
+    \item La \textbf{Industria 4.0} y el \textbf{IIoT} se apoyan en Ethernet e Internet para lograr la fabrica conectada, incluyendo robots colaborativos (cobots) y trabajo remoto.
 \end{itemize}
