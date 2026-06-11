@@ -62,12 +62,7 @@ conectadas a la alimentacion (tipicamente 4.7 k$\Omega$ a 3.3 V o 5 V).
 % TODO: imagen
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.8\textwidth}{
-        \centering
-        \vspace{1cm}
-        TODO: Esquema del bus I2C con maestro, dos esclavos y resistencias de pull-up.
-        \vspace{1cm}
-    }}
+    \includegraphics[width=0.8\textwidth]{assets/cap6/6.1.png}
     \caption{Esquema basico del bus I2C con resistencias de pull-up.}
     \label{fig:i2c_esquema}
 \end{figure}
@@ -179,12 +174,7 @@ Un bus SPI completo utiliza cuatro lineas:
 % TODO: imagen
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.8\textwidth}{
-        \centering
-        \vspace{1cm}
-        TODO: Esquema SPI con maestro, dos esclavos y lineas SCK, MOSI, MISO, SS.
-        \vspace{1cm}
-    }}
+    \includegraphics[width=0.8\textwidth]{assets/cap6/6.2.png}
     \caption{Esquema del bus SPI con un maestro y dos esclavos.}
     \label{fig:spi_esquema}
 \end{figure}
@@ -318,13 +308,7 @@ $\Omega$) al principio y al final del bus para evitar reflexiones de senal.
 % TODO: imagen
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.8\textwidth}{
-        \centering
-        \vspace{1cm}
-        TODO: Esquema de bus RS-485 con par trenzado, terminaciones de 120 Ohm
-        y varios nodos conectados.
-        \vspace{1cm}
-    }}
+    \includegraphics[width=0.8\textwidth]{assets/cap6/6.3.png}
     \caption{Topologia tipica de un bus RS-485 con terminaciones.}
     \label{fig:rs485_topologia}
 \end{figure}
@@ -572,29 +556,23 @@ los siguientes campos:
 
 \begin{table}[H]
     \centering
+    \small
     \caption{Campos de una trama de datos CAN (formato estandar)}
     \label{tab:can_trama}
-    \begin{tabular}{|l|c|p{6cm}|}
-        \hline
+    \begin{tabularx}{\textwidth}{@{}l>{\centering\arraybackslash}p{1.8cm}X@{}}
+        \toprule
         \textbf{Campo} & \textbf{Bits} & \textbf{Descripcion} \\
-        \hline
+        \midrule
         Inicio de trama (SOF) & 1 & Bit dominante que marca el inicio \\
-        \hline
         Identificador + RTR & 12 & 11 bits de ID + 1 bit RTR (Remote Transmission Request) \\
-        \hline
         Control & 6 & Indica tamano de datos y formato (estandar/extendido) \\
-        \hline
         Datos & 0--64 & De 0 a 8 bytes de informacion util \\
-        \hline
         CRC & 15 + 1 & Codigo de redundancia ciclica + delimitador \\
-        \hline
         ACK & 2 & Ventana de reconocimiento por parte de los receptores \\
-        \hline
         Fin de trama (EOF) & 7 & Bits recesivos que marcan el final \\
-        \hline
         Intermission (IFS) & 3 & Tiempo minimo entre tramas \\
-        \hline
-    \end{tabular}
+        \bottomrule
+    \end{tabularx}
 \end{table}
 
 \textbf{Formato estandar vs extendido:}
@@ -645,13 +623,7 @@ arbitraje.
 % TODO: imagen
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.8\textwidth}{
-        \centering
-        \vspace{1cm}
-        TODO: Diagrama temporal de arbitraje CAN con dos nodos compitiendo.
-        Nodo A (ID 0x123) gana sobre Nodo B (ID 0x456).
-        \vspace{1cm}
-    }}
+    \includegraphics[width=0.8\textwidth]{assets/cap6/6.4.png}
     \caption{Arbitraje no destructivo en el bus CAN.}
     \label{fig:can_arbitraje}
 \end{figure}
@@ -742,13 +714,7 @@ evitar reflexiones. En topologias cortas, una sola terminacion puede bastar.
 % TODO: imagen
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.8\textwidth}{
-        \centering
-        \vspace{1cm}
-        TODO: Topologia de bus CAN con terminaciones, nodos conectados y
-        conector DB9 con pines CAN\_H, CAN\_L, CAN\_GND y CAN\_SHLD.
-        \vspace{1cm}
-    }}
+    \includegraphics[width=0.8\textwidth]{assets/cap6/6.5.png}
     \caption{Topologia de bus CAN segun la norma ISO 11898.}
     \label{fig:can_topologia}
 \end{figure}
@@ -794,37 +760,6 @@ Los chips controladores CAN se clasifican en dos categorias:
 La mayoria de los microcontroladores modernos integran un controlador CAN Full
 o al menos Basic CAN, lo que facilita su uso en aplicaciones industriales sin
 necesidad de hardware externo.
-
-\subsection{Resumen: SPI, I2C, RS-485, Modbus y CAN}
-
-\begin{table}[H]
-    \centering
-    \caption{Resumen comparativo de protocolos industriales}
-    \label{tab:resumen_protocolos}
-    \small
-    \begin{tabular}{|l|c|c|c|c|c|}
-        \hline
-        \textbf{Caracteristica} & \textbf{I2C} & \textbf{SPI} & \textbf{RS-485} & \textbf{Modbus} & \textbf{CAN} \\
-        \hline
-        Tipo & Sincrono & Sincrono & Diferencial & Protocolo & Bus serie \\
-        \hline
-        Duplex & Half & Full & Half & Half/Full & Half \\
-        \hline
-        Nodos & 127 (7 bits) & Limitado por SS & 32+ & 247 (RTU) & Ilimitado \\
-        \hline
-        Distancia & Corta (placa) & Corta (placa) & 1200 m & 1200 m & 500 m+ \\
-        \hline
-        Velocidad & 3.4 Mbps & 10+ Mbps & 10 Mbps & 115.2 kbps & 1 Mbps \\
-        \hline
-        Arbitraje & Software & SS hardware & Maestro unico & Master/slave & No destructivo \\
-        \hline
-        Deteccion errores & ACK & Ninguna & CRC/paridad & CRC (RTU) & CRC + bit stuff \\
-        \hline
-        Uso tipico & Sensores, EEPROM & Pantallas, Flash & Redes de campo & PLCs, SCADA & Automocion, robots \\
-        \hline
-    \end{tabular}
-\end{table}
-
 
 %=============================================================================
 \section{Resumen de la Unidad 6}
