@@ -517,7 +517,7 @@ pin 2 de la ESP32 y mostrarla por el puerto serie.
 
 El código es sencillo: se inicializa el sensor, se realiza una lectura cada 2 segundos
 y se comprueba que el valor sea válido (el DHT11 puede devolver errores ocasionales
-si no se respeta el tiempo de muestreo). El listado de código completo se encuentra en el apéndice correspondiente.
+si no se respeta el tiempo de muestreo).
 
 \begin{figure}[H]
 \centering
@@ -541,17 +541,17 @@ Ambas caracteristicas tienen notificaciones activadas, lo que significa que cual
 cliente conectado recibira los datos automaticamente sin tener que solicitarlos.
 
 El servidor tambien gestiona la reconexion: si el cliente se desconecta, la ESP32
-vuelve a anunciarse (advertising) para aceptar nuevas conexiones. El código completo del servidor BLE se incluye en el apéndice.
+vuelve a anunciarse (advertising) para aceptar nuevas conexiones.
 
 En el bucle principal, si hay un cliente conectado, el servidor lee el DHT11 y
-envia el valor por ambas caracteristicas (ver apéndice con el código completo).
+envia el valor por ambas caracteristicas.
 
 \subsubsection{Tercera parte: cliente BLE}
 
 La segunda ESP32-S3 actua como \textbf{cliente BLE}. Su mision es escanear el entorno
 buscando un dispositivo que anuncie el \texttt{SERVICE\_UUID} del servidor, conectarse
 a el, suscribirse a las notificaciones de una de las caracteristicas y mostrar el
-dato recibido por el puerto serie. El código del cliente BLE se encuentra en el apéndice.
+dato recibido por el puerto serie.
 
 \subsubsection{Cuarta parte: servidor y cliente Wi-Fi}
 
@@ -561,12 +561,12 @@ abierta. En este caso, la ESP32-S3 que lleva el DHT11 se conecta a la red
 
 Cada vez que un cliente visita la URL \texttt{http://IP\_DEL\_ESP32/temperatura},
 el servidor lee el sensor y responde con el valor de temperatura como texto plano.
-El código completo del servidor Wi-Fi se incluye en el apéndice.
+
 
 Por otro lado, la segunda ESP32 (o cualquier ordenador) actua como \textbf{cliente
 HTTP}. Se conecta a la misma red Wi-Fi, construye la URL a partir de la IP del
 servidor, realiza una peticion \texttt{GET} cada 2 segundos y muestra la respuesta.
-El código del cliente HTTP se encuentra en el apéndice.
+
 
 \subsection{Problemas encontrados}
 
