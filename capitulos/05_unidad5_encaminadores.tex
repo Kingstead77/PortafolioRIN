@@ -360,6 +360,198 @@ RIPng (RIP new generation) es la adaptacion de RIP-2 para IPv6:
 \end{itemize}
 
 
+\section{Tablas de Encaminamiento}
+
+\subsection{Encaminamiento ``Next-Hop''}
+
+\begin{definicion}
+El principio de encaminamiento \textbf{Next-Hop} se basa en la optimizacion: si el camino mas corto entre A y D pasa por B, entonces el camino mas corto de B a D es la misma ruta. Por tanto, solo se necesita conocer el \textbf{siguiente encaminador inmediato} (next hop), no la ruta completa.
+\end{definicion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.1.png}
+\caption{Principio de encaminamiento next-hop}
+\label{fig:next-hop}
+\end{figure}
+
+\subsection{Estructura de una tabla de encaminamiento}
+
+Una tabla de encaminamiento contiene las siguientes entradas:
+
+\begin{itemize}
+    \item \textbf{Destino}: red o host de destino.
+    \item \textbf{Mascara o prefijo de red (CIDR)}: define la porcion de red de la direccion.
+    \item \textbf{Siguiente salto (next hop)}: direccion del siguiente router hacia el destino.
+    \item \textbf{Coste}: metrica asociada al camino.
+\end{itemize}
+
+Tipos de entrada destino:
+\begin{itemize}
+    \item \textbf{Host especifico}: no viable en Internet por el gran numero de equipos.
+    \item \textbf{Red}: con prefijo CIDR, la entrada mas utilizada.
+    \item \textbf{Default}: para paquetes sin coincidencia en las demas entradas.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.2.png}
+\caption{Ejemplo de tabla de encaminamiento}
+\label{fig:tabla-encaminamiento}
+\end{figure}
+
+\subsection{Ejemplo practico}
+
+Dada una topologia de red con varios routers:
+\begin{enumerate}
+    \item Determinar la tabla de encaminamiento del router R1.
+    \item Procesar paquetes con destino \texttt{201.4.22.35} y \texttt{18.24.32.78}.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.3.png}
+\caption{Topologia de red del ejemplo con routers}
+\label{fig:topologia-ejemplo}
+\end{figure}
+
+\subsection{Escalabilidad}
+
+El encaminamiento con clase no es viable por el gran numero de redes. Soluciones:
+\begin{itemize}
+    \item \textbf{CIDR}: agregacion de direcciones y resumen de rutas.
+    \item \textbf{Encaminamiento jerarquico}: limita la informacion intercambiada entre dominios.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.4.png}
+\caption{Agregacion CIDR y jerarquia de encaminamiento}
+\label{fig:cidr-jerarquia}
+\end{figure}
+
+
+\section{Tecnicas de Encaminamiento}
+
+\subsection{Encaminamiento local}
+
+No usa topologia global, solo informacion local.
+
+\begin{itemize}
+    \item \textbf{Aleatorio}: elige una salida al azar. Simple pero no optimo.
+    \item \textbf{Aislado}: usa informacion local (mayor ancho de banda, menor congestion, round-robin).
+    \item \textbf{Por inundacion (flooding)}: envia el paquete a todos los vecinos menos al origen.
+\end{itemize}
+
+\begin{definicion}
+El \textbf{encaminamiento por inundacion (flooding)} es una tecnica en la que cada nodo reenvia el paquete recibido a todos sus vecinos excepto a aquel del que lo recibio. El destinatario puede recibir copias duplicadas, por lo que se usa un identificador unico para descartarlas. Se emplea el campo TTL para evitar bucles infinitos.
+\end{definicion}
+
+Ventajas del flooding: robusto, garantiza el camino mas corto, visita todos los nodos. Desventajas: saturacion por duplicados.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.5.png}
+\caption{Ejemplo de inundacion en red con multiples routers}
+\label{fig:flooding-ejemplo}
+\end{figure}
+
+\subsection{Encaminamiento estatico}
+
+Considera la topologia de la red. Las tablas se construyen \textbf{manualmente} y no se adaptan a cambios en la red.
+
+
+
+
+\section{Vectores de Distancia}
+
+\subsection{Fundamentos}
+
+\begin{definicion}
+En el \textbf{encaminamiento por vectores de distancia}, cada encaminador mantiene una entrada por cada destino posible con: destino, siguiente nodo y distancia/metria. El intercambio periodico de estos vectores con los vecinos permite que la red converja a caminos optimos mediante el algoritmo de \textbf{Bellman-Ford}. La metrica tipica es el \textbf{numero de saltos} (hop count).
+\end{definicion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.6.png}
+\caption{Tabla de vectores de distancia inicial}
+\label{fig:vectores-inicial}
+\end{figure}
+
+\subsection{Ejemplo de intercambio}
+
+Inicialmente solo se conocen rutas directas. Tras el intercambio, cada router conoce la mejor ruta a todos los destinos.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.7.png}
+\caption{Intercambio de vectores de distancia}
+\label{fig:intercambio-vectores}
+\end{figure}
+
+\subsection{Problema: Cuenta a infinito}
+
+Cuando un enlace cae o aumenta su coste, los cambios tardan en propagarse. Puede no converger debido a actualizaciones circulares que incrementan la metrica.
+
+\begin{definicion}
+La \textbf{cuenta a infinito (count-to-infinity)} es un problema de los protocolos por vectores de distancia en el que, tras un cambio negativo en la topologia, los routers incrementan ciclicamente sus metricas hasta alcanzar el limite establecido, provocando una convergencia muy lenta.
+\end{definicion}
+
+\subsection{Soluciones a la cuenta a infinito}
+
+\begin{enumerate}
+    \item \textbf{Limitar el infinito}: en RIP, 16 saltos = inalcanzable.
+    \item \textbf{Horizonte dividido (split horizon)}: no se anuncia una ruta por la interfaz por la que se aprendio.
+    \item \textbf{Horizonte dividido con respuesta envenenada (poisoned reverse)}: se anuncia con distancia infinita.
+    \item \textbf{Actualizaciones forzadas (triggered updates)}: ante un cambio, se difunde inmediatamente.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.8.png}
+\caption{Split horizon}
+\label{fig:split-horizon}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.9.png}
+\caption{Split horizon con poisoned reverse}
+\label{fig:poisoned-reverse}
+\end{figure}
+
+
+\section{Encaminamiento en Internet}
+
+\subsection{Sistemas Autonomos (AS)}
+
+\begin{definicion}
+Un \textbf{Sistema Autonomo (AS)} es un conjunto de redes y routers gestionados por una misma autoridad. Los \textbf{routers internos} usan protocolos IGP y solo conocen la organizacion de su AS. Los \textbf{routers frontera} (border routers) usan protocolos EGP y conocen el camino a otros AS, pero no su organizacion interna.
+\end{definicion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.10.png}
+\caption{Estructura de Internet con sistemas autonomos}
+\label{fig:sistemas-autonomos}
+\end{figure}
+
+\subsection{Protocolos IGP (interior)}
+
+\begin{itemize}
+    \item \textbf{RIP} -- Routing Information Protocol
+    \item \textbf{OSPF} -- Open Shortest Path First
+    \item \textbf{IGRP} -- Internal Gateway Routing Protocol (Cisco)
+\end{itemize}
+
+\subsection{Protocolos EGP (exterior)}
+
+\begin{itemize}
+    \item \textbf{EGP} -- External Gateway Protocol
+    \item \textbf{BGP} -- Border Gateway Protocol
+\end{itemize}
+
+
 \section{Practica 5: Encaminamiento en Internet con RIP}
 \label{sec:practica5}
 
@@ -413,148 +605,14 @@ formando una topologia mallada. Cada router tiene al menos una LAN conectada:
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla de Packet Tracer mostrando la topologia con 4 routers, las LANs y los enlaces seriales.}\vspace{1.5cm}}}
+\includegraphics[width=0.8\textwidth]{assets/cap5/5.11.png}
 \caption{Topologia de la red con 4 routers y encaminamiento RIP}
 \label{fig:topologia-rip}
 \end{figure}
 
 \subsubsection{Configuracion de RIP en los routers}
 
-El protocolo \textbf{RIP} (Routing Information Protocol) es un protocolo de
-encaminamiento por \textbf{vectores de distancia} que utiliza el numero de saltos
-como metrica. En esta practica se configuro RIP version 2, que permite el uso de
-subredes con mascara variable (VLSM) y envia actualizaciones por multicast.
 
-\begin{lstlisting}[caption={Configuracion de RIP en Router 0},label={lst:router0-rip}]
-Router> enable
-Router# configure terminal
-Router(config)# router rip
-Router(config-router)# version 2
-Router(config-router)# no auto-summary
-Router(config-router)# network 192.168.10.0
-Router(config-router)# network 10.10.10.0
-Router(config-router)# network 10.10.30.0
-Router(config-router)# passive-interface g0/0
-Router(config-router)# default-information originate
-Router(config-router)# end
-Router# wr
-Router# show ip protocols
-\end{lstlisting}
-
-\textbf{Explicacion de los comandos}:
-\begin{itemize}
-    \item \texttt{router rip}: activa el proceso de encaminamiento RIP.
-    \item \texttt{version 2}: fuerza el uso de RIPv2 (soporta CIDR/VLSM).
-    \item \texttt{no auto-summary}: desactiva el resumen automatico de rutas.
-    \item \texttt{network X.X.X.X}: anuncia las redes directamente conectadas.
-    \item \texttt{passive-interface g0/0}: evita enviar actualizaciones RIP por
-    la interfaz hacia la LAN (innecesario y mas seguro).
-    \item \texttt{default-information originate}: propaga una ruta por defecto si
-    existe.
-    \item \texttt{show ip protocols}: verifica que RIP esta activo y muestra las redes
-    configuradas.
-\end{itemize}
-
-Las configuraciones de los otros routers siguen la misma logica, anunciando las
-redes que tienen directamente conectadas:
-
-\begin{lstlisting}[caption={Configuracion de RIP en Router 1},label={lst:router1-rip}]
-Router(config)# router rip
-Router(config-router)# version 2
-Router(config-router)# no auto-summary
-Router(config-router)# network 10.10.20.0
-Router(config-router)# network 10.10.30.0
-Router(config-router)# default-information originate
-Router(config-router)# end
-Router# wr
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Configuracion de RIP en Router 2},label={lst:router2-rip}]
-Router(config)# router rip
-Router(config-router)# version 2
-Router(config-router)# no auto-summary
-Router(config-router)# network 10.10.10.0
-Router(config-router)# network 10.10.20.0
-Router(config-router)# network 10.10.40.0
-Router(config-router)# default-information originate
-Router(config-router)# end
-Router# wr
-\end{lstlisting}
-
-\begin{lstlisting}[caption={Configuracion de RIP en Router 3},label={lst:router3-rip}]
-Router(config)# router rip
-Router(config-router)# version 2
-Router(config-router)# no auto-summary
-Router(config-router)# network 192.168.20.0
-Router(config-router)# network 10.10.40.0
-Router(config-router)# passive-interface g0/1
-Router(config-router)# default-information originate
-Router(config-router)# end
-Router# wr
-\end{lstlisting}
-
-\subsubsection{Verificacion del encaminamiento}
-
-Una vez configurado RIP en todos los routers, se espera unos minutos para que
-las tablas converjan (proceso de convergencia de RIP). Luego, se verifica que
-cada router conoce las redes remotas:
-
-\begin{lstlisting}[language=bash,caption={Verificacion de la tabla de encaminamiento en Router 0},label={lst:show-ip-route}]
-Router# show ip route
-
-C    192.168.10.0/24 is directly connected, GigabitEthernet0/0
-C    10.10.10.0/24 is directly connected, Serial0/0/0
-C    10.10.30.0/24 is directly connected, Serial0/0/1
-R    10.10.20.0/24 [120/1] via 10.10.30.2, 00:00:15, Serial0/0/1
-                   [120/1] via 10.10.10.2, 00:00:15, Serial0/0/0
-R    10.10.40.0/24 [120/1] via 10.10.10.2, 00:00:15, Serial0/0/0
-R    192.168.20.0/24 [120/2] via 10.10.10.2, 00:00:15, Serial0/0/0
-\end{lstlisting}
-
-\textbf{Analisis de la tabla}:
-\begin{itemize}
-    \item Las rutas marcadas con \texttt{C} son \textbf{directamente conectadas}.
-    \item Las rutas marcadas con \texttt{R} fueron aprendidas mediante \textbf{RIP}.
-    \item El formato \texttt{[120/1]} indica: distancia administrativa 120 (RIP) y
-    \textbf{1 salto} hasta esa red.
-    \item La red 192.168.20.0/24 esta a \texttt{[120/2]}: dos saltos desde Router 0.
-\end{itemize}
-
-\subsubsection{Verificacion de conectividad}
-
-Se realizo una prueba de conectividad desde un PC en la LAN 192.168.10.0 hacia
-un PC en la LAN 192.168.20.0:
-
-\begin{lstlisting}[language=bash,caption={Ping desde LAN 192.168.10.0 hacia LAN 192.168.20.0},label={lst:ping-interlan}]
-C:\> ping 192.168.20.10
-
-Reply from 192.168.20.10: bytes=32 time=12ms TTL=253
-Reply from 192.168.20.10: bytes=32 time=10ms TTL=253
-Reply from 192.168.20.10: bytes=32 time=11ms TTL=253
-Reply from 192.168.20.10: bytes=32 time=10ms TTL=253
-\end{lstlisting}
-
-El ping exitoso con TTL=253 confirma que los paquetes atravesaron 3 routers (TTL
-inicial 255 menos 3 saltos = 252, ajustado por el sistema operativo).
-
-\begin{lstlisting}[language=bash,caption={Traceroute desde Router 0 hacia 192.168.20.10},label={lst:traceroute}]
-Router# traceroute 192.168.20.10
-
-Tracing the route to 192.168.20.10
-  1   10.10.10.2    2 msec    2 msec    2 msec
-  2   10.10.40.2    3 msec    3 msec    3 msec
-  3   192.168.20.10  4 msec    4 msec    4 msec
-\end{lstlisting}
-
-El traceroute confirma que el camino es: Router 0 $\rightarrow$ Router 2
-$\rightarrow$ Router 3 $\rightarrow$ PC destino.
-
-\begin{figure}[H]
-\centering
-\fbox{\parbox{0.8\textwidth}{\centering\vspace{1.5cm}\textit{TODO: Anadir captura de pantalla del resultado de traceroute o ping en Packet Tracer.}\vspace{1.5cm}}}
-\caption{Resultado de traceroute mostrando el camino de 3 saltos}
-\label{fig:traceroute}
-\end{figure}
 
 \subsection{Relacion teoria-practica}
 
@@ -584,23 +642,14 @@ Passive-interface & Evita enviar actualizaciones RIP por la interfaz LAN, reduci
 \section{Resumen de la Unidad 5}
 
 \begin{itemize}
-    \item El \textbf{encaminamiento} es la eleccion del camino optimo para un paquete;
-    la \textbf{conmutacion} es el reenvio por ese camino.
-    \item Los \textbf{grafos} modelan las redes: nodos son routers, enlaces son conexiones.
-    Se representan mediante listas de adyacencia (eficientes en memoria) o
-    matrices de adyacencia (busqueda rapida).
-    \item Los \textbf{algoritmos de camino mas corto} como Dijkstra y Bellman-Ford
-    permiten calcular rutas optimas. El \textbf{Minimum Spanning Tree} es util
-    para difusion y para evitar bucles en bridges.
-    \item Los \textbf{protocolos de encaminamiento} se clasifican en: vector de
-    distancia (RIP, Bellman-Ford) y estado de enlace (OSPF, Dijkstra).
-    \item El \textbf{encaminamiento jerarquico} organiza Internet en Sistemas
-    Autonomos (AS), usando protocolos IGP (RIP, OSPF) internamente y EGP (BGP)
-    entre AS.
-    \item \textbf{RIP} es un protocolo IGP por vectores de distancia con metrica de
-    saltos, limite de 16, temporizadores periodicos (30s), de expiracion (180s)
-    y de basura (120s).
-    \item La \textbf{Practica 5} demuestra la configuracion de RIPv2 en una red de 4
-    routers, la convergencia de tablas, la verificacion con \texttt{show ip route},
-    \texttt{ping} y \texttt{traceroute}, confirmando la comunicacion entre redes distantes.
+    \item El \textbf{encaminamiento} es la eleccion del camino optimo para un paquete; la \textbf{conmutacion} es el reenvio por ese camino.
+    \item Los \textbf{grafos} modelan las redes: nodos son routers, enlaces son conexiones. Se representan mediante listas o matrices de adyacencia.
+    \item Los \textbf{algoritmos de camino mas corto} como Dijkstra y Bellman-Ford permiten calcular rutas optimas. El \textbf{Minimum Spanning Tree} es util para difusion y evitacion de bucles.
+    \item Las \textbf{tablas de encaminamiento} almacenan destino, mascara, siguiente salto y coste. El principio \textbf{next-hop} permite que cada router solo conozca el siguiente paso.
+    \item Las \textbf{tecnicas de encaminamiento} incluyen: local (aleatorio, aislado, flooding), estatico (manual) y dinamico (vectores de distancia o estado de enlace).
+    \item El \textbf{encaminamiento por vectores de distancia} usa Bellman-Ford e intercambio periodico de tablas. Sufre el problema de \textbf{cuenta a infinito}, resuelto con horizonte dividido, poisoned reverse y triggered updates.
+    \item Los \textbf{protocolos de encaminamiento} se clasifican en: vector de distancia (RIP, Bellman-Ford) y estado de enlace (OSPF, Dijkstra).
+    \item El \textbf{encaminamiento jerarquico} organiza Internet en Sistemas Autonomos (AS), usando protocolos IGP (RIP, OSPF) internamente y EGP (BGP) entre AS.
+    \item \textbf{RIP} es un protocolo IGP por vectores de distancia con metrica de saltos, limite de 16, temporizadores periodicos (30s), de expiracion (180s) y de basura (120s).
+    \item La \textbf{Practica 5} demuestra la configuracion de RIPv2 en una red de 4 routers, la convergencia de tablas, la verificacion con \texttt{show ip route}, \texttt{ping} y \texttt{traceroute}.
 \end{itemize}
