@@ -328,16 +328,14 @@ Universidad Politécnica de Valencia
 
 \LARGE\bfseries\@title
 
-\vspace{0.3cm}
-\begin{center}
-\includegraphics[width=0.68\textwidth,height=0.28\textheight,keepaspectratio]{assets/portada/fotoPortada.PNG}
-\end{center}
-
-\vspace{0.25cm}
+\vspace{0.5cm}
 
 \large\scshape \tfgname
-\par\vspace{0.2cm}\par
+\par\vspace{0.3cm}\par
 \normalfont\textcolor{grisclar}{\titulacioname}
+
+\vspace{0.4cm}
+\normalfont\textcolor{grisclar}{\small Curso 2025--2026}
 
 \vspace{0.25cm}
 
